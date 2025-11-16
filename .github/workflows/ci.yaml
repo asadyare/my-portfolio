@@ -2,104 +2,253 @@ name: Frontend CI
 
 on:
   push:
-    branches:
-      - main
+   branches:
+     - main
   pull_request:
-    branches:
-      - main
-
+   branches:
+     - main
 permissions:
-  contents: read
-  pull-requests: read
-  security-events: write
+ contents: read
+ pull-requests: read
+ security-events: write
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+ pipeline:
+  name: Run Pipeline
+  runs-on: ubuntu-latest
+  strategy:
+   fail-fast: false
+   matrix: 
+       task: [build, lint, test, codeql, snyk, checkov, gitleaks, trivy]
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+  steps:
+  - uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
 
-      - name: Install
-        run: npm install
+  - name: Setup Node
+    if: matrix.task == 'build' || matrix.task == 'lint' || matrix.task == 'test' || matrix.task == 'snyk'
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
 
-      - name: Build
-        run: npm run build
+  - name: Install
+    if: matrix.task == 'build' || matrix.task == 'lint' || matrix.task == 'test' || matrix.task == 'snyk'
+    run: npm install
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  - name: Build
+    if: matrix.task == 'build'
+    run: npm run build
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+  - name: Lint
+    if: matrix.task == 'lint'
+    run: npm run lint
 
-      - name: Install
-        run: npm install
+  - name: Test
+    if: matrix.task == 'test'
+    run: npm test
 
-      - name: Run ESLint
-        run: npm run lint
+  - name: CodeQL Init
+    if: matrix.task == 'codeql'
+    uses: github/codeql-action/init@v3
+    with:
+      languages: javascript
 
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  - name: CodeQL Analyze
+    if: matrix.task == 'codeql'
+    uses: github/codeql-action/analyze@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+  - name: Snyk Scan
+    if: matrix.task == 'snyk'
+    uses: snyk/actions/node@master
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN}}
+    with:
+      args: test --severity-threshold=high
 
-      - name: Install
-        run: npm install
+  - name: Run Checkov
+    if: matrix.task == 'checkov'
+    uses: bridgecrewio/checkov-action@v12
+    with:
+      directory: .
+      soft_fail: false
 
-      - name: Run Tests
-        run: npm test
+  - name: Install Gitleaks
+    if: matrix.task == 'gitleaks'
+    run: |
+      wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
+      tar -xzf gitleaks_8.18.4_linux_x64.tar.gz
+      mv gitleaks /usr/local/bin/gitleaks
+      chmod +x /usr/local/bin/gitleaks
 
-  gitleaks:
-     name: Secret Scan
-     runs-on: ubuntu-latest
-     permissions:
-      contents: read
-      security-events: write
-      pull-requests: read
-     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  - name: Run Gitleaks
+    if: matrix.task == 'gitleaks'
+    run: gitleaks detect --source . --no-banner --report-format sarif --report-path gitleaks-results.sarif
 
-      - name: Download Gitleaks
-        run: |
-         wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
-         tar -xzf gitleaks_8.18.4_linux_x64.tar.gz
-         mv gitleaks /usr/local/bin/gitleaks
-         chmod +x /usr/local/bin/gitleaks
+  - name: Upload Gitleaks SARIF
+    if: matrix.task == 'gitleaks'
+    uses: github/codeql-action/upload-sarif@v4
+    with:
+      sarif_file: gitleaks-results.sarif
 
-      - name: Run Gitleaks
-        run: gitleaks detect --source . --no-banner --report-format sarif --report-path gitleaks-results.sarif
+  - name: Install Trivy
+    if: matrix.task == 'trivy'
+    run: |
+      sudo apt-get update
+      sudo apt-get install wget
+      wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/download/v0.55.2/trivy_0.55.2_Linux-64bit.deb
+      sudo dpkg -i trivy.deb
 
-      - name: List Files
-        run: ls -la
+  - name: Run Trivy
+    if: matrix.task == 'trivy'
+    run: trivy fs . --format sarif --severity HIGH,CRITICAL --exit-code 1 --output trivy-results.sarif
 
-      - name: Upload Gitleaks SARIF
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-         sarif_file: gitleaks-results.sarif
+  - name: Upload Trivy SARIF
+    if: matrix.task == 'trivy'
+    uses: github/codeql-action/upload-sarif@v4
+    with:
+      sarif_file: trivy-results.sarif
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# name: Frontend CI
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+
+# permissions:
+#   contents: read
+#   pull-requests: read
+#   security-events: write
+
+# jobs:
+#   build:
+#     name: Build
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - name: Install
+#         run: npm install
+
+#       - name: Build
+#         run: npm run build
+
+#   lint:
+#     name: Lint
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - name: Install
+#         run: npm install
+
+#       - name: Run ESLint
+#         run: npm run lint
+
+#   test:
+#     name: Test
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - name: Install
+#         run: npm install
+
+#       - name: Run Tests
+#         run: npm test
+
+#   gitleaks:
+#      name: Secret Scan
+#      runs-on: ubuntu-latest
+#      permissions:
+#       contents: read
+#       security-events: write
+#       pull-requests: read
+#      steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Download Gitleaks
+#         run: |
+#          wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
+#          tar -xzf gitleaks_8.18.4_linux_x64.tar.gz
+#          mv gitleaks /usr/local/bin/gitleaks
+#          chmod +x /usr/local/bin/gitleaks
+
+#       - name: Run Gitleaks
+#         run: gitleaks detect --source . --no-banner --report-format sarif --report-path gitleaks-results.sarif
+
+#       - name: List Files
+#         run: ls -la
+
+#       - name: Upload Gitleaks SARIF
+#         uses: github/codeql-action/upload-sarif@v4
+#         with:
+#          sarif_file: gitleaks-results.sarif
 
 
 
