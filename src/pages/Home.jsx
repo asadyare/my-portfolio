@@ -4,6 +4,6 @@ function Home() {
       <h1 className="text-3xl font-bold mb-2">Home</h1>
       <p>Welcome to my DevSecOps portfolio.</p>
     </div>
-  )
+  );
 }
-export default Home
+export default Home;

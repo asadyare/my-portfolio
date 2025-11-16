@@ -1,4 +1,4 @@
-import data from '../data/projects.json'
+import data from '../data/projects.json';
 
 function Projects() {
   return (
@@ -16,9 +16,7 @@ function Projects() {
                 </span>
               ))}
             </div>
-            <div className="text-sm text-gray-700">
-              Tools: {project.tools.join(", ")}
-            </div>
+            <div className="text-sm text-gray-700">Tools: {project.tools.join(', ')}</div>
             <a
               href={project.github}
               target="_blank"
@@ -31,7 +29,7 @@ function Projects() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export default Projects
+export default Projects;
