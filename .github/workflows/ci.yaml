@@ -72,32 +72,161 @@ jobs:
         run: npm test
 
   gitleaks:
-    name: Secret Scan
-    runs-on: ubuntu-latest
-    permissions:
+     name: Secret Scan
+     runs-on: ubuntu-latest
+     permissions:
       contents: read
       security-events: write
       pull-requests: read
-    steps:
+     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          scan_mode: all
-          commit_depth: 0
-          report_format: sarif
-          report_path: gitleaks-results.sarif
-          exit_code: 0
+      - name: Install Gitleaks
+        run: |
+          wget -q https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -O gitleaks
+          chmod +x gitleaks
 
-      - name: show files
-        run: ls -la  
+      - name: Run Gitleaks
+        run: |
+          ./gitleaks detect \
+            --source . \
+            --report-format sarif \
+            --report-path gitleaks-results.sarif \
+            --no-banner \
+            --verbose \
+            || true
+
+      - name: Show files
+        run: ls -la
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: gitleaks-results.sarif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# name: Frontend CI
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+
+# permissions:
+#   contents: read
+#   pull-requests: read
+#   security-events: write
+
+# jobs:
+#   build:
+#     name: Build
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - name: Install
+#         run: npm install
+
+#       - name: Build
+#         run: npm run build
+
+#   lint:
+#     name: Lint
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - name: Install
+#         run: npm install
+
+#       - name: Run ESLint
+#         run: npm run lint
+
+#   test:
+#     name: Test
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Setup Node
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 20
+
+#       - name: Install
+#         run: npm install
+
+#       - name: Run Tests
+#         run: npm test
+
+#   gitleaks:
+#     name: Secret Scan
+#     runs-on: ubuntu-latest
+#     permissions:
+#       contents: read
+#       security-events: write
+#       pull-requests: read
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Run Gitleaks
+#         uses: gitleaks/gitleaks-action@v2
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           scan_mode: all
+#           commit_depth: 0
+#           report_format: sarif
+#           report_path: gitleaks-results.sarif
+#           exit_code: 0
+
+#       - name: show files
+#         run: ls -la  
+
+#       - name: Upload SARIF
+#         uses: github/codeql-action/upload-sarif@v4
+#         with:
+#           sarif_file: gitleaks-results.sarif
