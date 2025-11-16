@@ -91,9 +91,10 @@ jobs:
           scan_mode: all
           commit_depth: 0
           report_format: sarif
-          report_path: gitleaks-results.sarif
+          report_path: ./gitleaks-results.sarif
+          exit_code: 0
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: gitleaks-results.sarif
+          sarif_file: ./gitleaks-results.sarif
