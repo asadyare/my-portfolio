@@ -1,15 +1,14 @@
 name: Frontend CI
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-  build:
+  install:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,19 +18,69 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install deps
         run: npm ci
 
-      - name: Run lint
+  lint:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm ci
+
+      - name: ESLint
         run: npx eslint src
 
-      - name: Run tests
+  test:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Test
         run: npm test
 
-      - name: Build app
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build
         run: npm run build
 
-      - name: Run Gitleaks scan
+  gitleaks:
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
-        with:
-          config-path: .pre-commit-config.yaml
