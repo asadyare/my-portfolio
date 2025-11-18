@@ -1,16 +1,68 @@
-# React + Vite
+# My DevSecOps Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+This is my personal portfolio built with **Node.js**, **Tailwind CSS**, and **Vite**.  
+It showcases my projects, skills, and DevSecOps expertise with CI/CD integration using **GitHub Actions**, security scanning with **Snyk**, and code analysis using **CodeQL**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Responsive portfolio site with About, Projects, and Contact sections
+- Custom branding and favicon
+- CI/CD pipeline with automated linting, security, and code analysis
+- Pre-commit hooks to prevent accidental secrets
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- Frontend: Node.js, Vite, React, Tailwind CSS
+- CI/CD: GitHub Actions
+- Security: Snyk, CodeQL, pre-commit hooks
+- Hosting (optional): AWS S3 + CloudFront / GitHub Pages
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Setup Instructions
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/YourUsername/your-repo.git
+   cd your-repo/frontend
+
+2. Install dependencies:
+
+npm ci
+Run the development server:
+npm run dev
+
+Open <http://localhost:5173>
+
+ to view locally.
+
+## Contributing
+
+Fork the repository and create a branch for your feature/fix
+
+Run lint before committing:
+
+npm run lint
+
+Commit your changes; pre-commit hooks will enforce security rules
+
+Submit a pull request to the main branch
+
+Testing & CI/CD
+
+GitHub Actions runs automatically on push and PR
+
+Includes linting, Snyk vulnerability scan, and CodeQL analysis
+
+Pre-commit hooks prevent secrets from being committed
+
+Badges
+
+## Screenshots
+
+Include screenshots of your portfolio site here if needed
+
+## License
+
+This project is licensed under the MIT License.
