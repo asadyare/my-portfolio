@@ -1,53 +1,46 @@
-# My DevSecOps Portfolio
+# DevSecOps Portfolio
 
-[![Build Status](https://github.com/asadyare/my-portfolio/actions/workflows/main.yml/badge.svg)](https://github.com/asadyare/my-portfolio/actions)
+[![Build Status](https://github.com/YourUsername/your-repo/actions/workflows/main.yml/badge.svg)](https://github.com/YourUsername/your-repo/actions)
+[![Snyk Vulnerabilities](https://snyk.io/test/github/YourUsername/your-repo/badge.svg)](https://snyk.io/test/github/YourUsername/your-repo)
+[![CodeQL](https://github.com/YourUsername/your-repo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/YourUsername/your-repo/security/code-scanning)
 
-[![Snyk Vulnerabilities](https://snyk.io/test/github/asadyare/my-portfolio/badge.svg)](https://snyk.io/test/github/asadyare/my-portfolio)
+A personal portfolio built with **Node.js**, **React**, **Tailwind CSS**, and **Vite**, showcasing projects and DevSecOps skills.
 
-[![CodeQL](https://github.com/asadyare/my-portfolio/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/asadyare/my-portfolio/security/code-scanning)
+## Table of Contents
 
- . Build Status: Shows whether your GitHub Actions workflow passes
-
- . Snyk Vulnerabilities: Displays your repo’s vulnerability scan results
-
- . CodeQL: Shows the status of GitHub’s automated code scanning
-
-## Overview
-
-This is my personal portfolio built with **Node.js**, **Tailwind CSS**, and **Vite**.  
-It showcases my projects, skills, and DevSecOps expertise with CI/CD integration using **GitHub Actions**, security scanning with **Snyk**, and code analysis using **CodeQL**.
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Quick Setup](#quick-setup)
+- [CI/CD & Security](#CI/CD--security)
+- [Contributing](#contributing)
+- [Screenshots](#screenshots)
+- [License](#license)
 
 ## Features
 
-- Responsive portfolio site with About, Projects, and Contact sections
+- Responsive portfolio with About, Projects, and Contact sections
 - Custom branding and favicon
-- CI/CD pipeline with automated linting, security, and code analysis
-- Pre-commit hooks to prevent accidental secrets
+- Pre-commit hooks to prevent committing secrets
 
 ## Tech Stack
 
-- Frontend: Node.js, Vite, React, Tailwind CSS
+- Frontend: Node.js, React, Tailwind CSS, Vite
 - CI/CD: GitHub Actions
 - Security: Snyk, CodeQL, pre-commit hooks
-- Hosting (optional): AWS S3 + CloudFront / GitHub Pages
 
-## Setup Instructions
+## Quick Setup
 
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/asadyare/my-portfolio.git
-   cd your-repo/frontend
-
-2. Install dependencies:
-
+```bash
+git clone https://github.com/asadyare/my-portfolio.git
+cd your-repo/frontend
 npm ci
-Run the development server:
 npm run dev
+
 
 Open <http://localhost:5173>
 
  to view locally.
+
 
 ## Contributing
 
@@ -61,7 +54,8 @@ Commit your changes; pre-commit hooks will enforce security rules
 
 Submit a pull request to the main branch
 
-Testing & CI/CD
+
+## CI/CD & Security
 
 GitHub Actions runs automatically on push and PR
 
