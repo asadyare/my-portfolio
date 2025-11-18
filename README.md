@@ -1,5 +1,9 @@
 # My DevSecOps Portfolio
 
+![Build Status](https://github.com/YourUsername/your-repo/actions/workflows/main.yml/badge.svg)
+![Snyk](https://snyk.io/test/github/YourUsername/your-repo/badge.svg)
+![CodeQL](https://github.com/YourUsername/your-repo/actions/workflows/codeql-analysis.yml/badge.svg)
+
 ## Overview
 
 This is my personal portfolio built with **Node.js**, **Tailwind CSS**, and **Vite**.  
@@ -24,7 +28,7 @@ It showcases my projects, skills, and DevSecOps expertise with CI/CD integration
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/YourUsername/your-repo.git
+   git clone https://github.com/asadyare/my-portfolio.git
    cd your-repo/frontend
 
 2. Install dependencies:
