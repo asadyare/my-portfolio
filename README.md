@@ -1,7 +1,9 @@
 # DevSecOps Portfolio
 
 [![Build Status](https://github.com/YourUsername/your-repo/actions/workflows/main.yml/badge.svg)](https://github.com/YourUsername/your-repo/actions)
+
 [![Snyk Vulnerabilities](https://snyk.io/test/github/YourUsername/your-repo/badge.svg)](https://snyk.io/test/github/YourUsername/your-repo)
+
 [![CodeQL](https://github.com/YourUsername/your-repo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/YourUsername/your-repo/security/code-scanning)
 
 A personal portfolio built with **Node.js**, **React**, **Tailwind CSS**, and **Vite**, showcasing projects and DevSecOps skills.
@@ -11,7 +13,7 @@ A personal portfolio built with **Node.js**, **React**, **Tailwind CSS**, and **
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Quick Setup](#quick-setup)
-- [CI/CD & Security](#ci-cd--security)
+- [CI/CD & Security](#cicd--security)
 - [Contributing](#contributing)
 - [Screenshots](#screenshots)
 - [License](#license)
