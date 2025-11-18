@@ -1,10 +1,10 @@
 # DevSecOps Portfolio
 
-[![Build Status](https://github.com/YourUsername/your-repo/actions/workflows/main.yml/badge.svg)](https://github.com/YourUsername/your-repo/actions)
+[![Build States](https://github.com/asadyare/my-portfolio/actions/workflows/ci.yaml/badge.svg)](https://github.com/asadyare/my-portfolio/actions/workflows/ci.yaml)
 
-[![Snyk Vulnerabilities](https://snyk.io/test/github/YourUsername/your-repo/badge.svg)](https://snyk.io/test/github/YourUsername/your-repo)
+[![Snyk Vulnerabilities](https://snyk.io/test/github/asadyare/my-portfolio/badge.svg)](https://snyk.io/test/github/asadyare/my-portfolio)
 
-[![CodeQL](https://github.com/YourUsername/your-repo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/YourUsername/your-repo/security/code-scanning)
+[![CodeQL](https://github.com/asadyare/my-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/asadyare/[my-portfolio/security/code-scanning)
 
 A personal portfolio built with **Node.js**, **React**, **Tailwind CSS**, and **Vite**, showcasing projects and DevSecOps skills.
 
