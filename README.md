@@ -11,7 +11,7 @@ A personal portfolio built with **Node.js**, **React**, **Tailwind CSS**, and **
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Quick Setup](#quick-setup)
-- [CI/CD & Security](#CI/CD--security)
+- [CI/CD & Security](#ci-cd--security)
 - [Contributing](#contributing)
 - [Screenshots](#screenshots)
 - [License](#license)
@@ -41,6 +41,7 @@ Open <http://localhost:5173>
 
  to view locally.
 
+```
 
 ## Contributing
 
@@ -53,7 +54,6 @@ npm run lint
 Commit your changes; pre-commit hooks will enforce security rules
 
 Submit a pull request to the main branch
-
 
 ## CI/CD & Security
 
