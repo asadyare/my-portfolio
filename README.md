@@ -1,10 +1,16 @@
 # My DevSecOps Portfolio
 
-![Build Status](https://github.com/YourUsername/your-repo/actions/workflows/main.yml/badge.svg)
+![Build Status](https://github.com/asadyare/my-portfolio/actions/workflows/main.yml/badge.svg)
 
-![Snyk](https://snyk.io/test/github/YourUsername/your-repo/badge.svg)
+[![Snyk Vulnerabilities](https://snyk.io/test/github/asadyare/my-portfolio/badge.svg)](https://snyk.io/test/github/asadyare/my-portfolio)
 
-![CodeQL](https://github.com/YourUsername/your-repo/actions/workflows/codeql-analysis.yml/badge.svg)
+[![CodeQL](https://github.com/asadyare/my-portfolio/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/asadyare/my-portfolio/security/code-scanning)
+
+** Build Status: Shows whether your GitHub Actions workflow passes
+
+** Snyk Vulnerabilities: Displays your repo’s vulnerability scan results
+
+** CodeQL: Shows the status of GitHub’s automated code scanning
 
 ## Overview
 
