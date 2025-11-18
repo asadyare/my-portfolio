@@ -1,7 +1,9 @@
 # My DevSecOps Portfolio
 
 ![Build Status](https://github.com/YourUsername/your-repo/actions/workflows/main.yml/badge.svg)
+
 ![Snyk](https://snyk.io/test/github/YourUsername/your-repo/badge.svg)
+
 ![CodeQL](https://github.com/YourUsername/your-repo/actions/workflows/codeql-analysis.yml/badge.svg)
 
 ## Overview
