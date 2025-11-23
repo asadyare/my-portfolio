@@ -1,9 +1,14 @@
-function Home() {
-  return (
-    <div className="p-8 text-center bg-white dark:bg-gray-900 dark:text-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-2">Home</h1>
-      <p>Welcome to my DevSecOps portfolio.</p>
-    </div>
-  );
+import Hero from '../components/Hero'
+import About from '../components/About'
+import ProjectsPreview from '../components/ProjectsPreview'
+
+
+export default function Home() {
+return (
+<div className="space-y-16 py-12">
+<Hero />
+<About />
+<ProjectsPreview />
+</div>
+)
 }
-export default Home;
