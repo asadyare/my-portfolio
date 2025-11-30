@@ -142,7 +142,7 @@ jobs:
         working-directory: terraform
         run: terraform plan
       - name: Terraform Apply
-        working-directory: terraform
+        working-directory: Terraform
         run: terraform apply -auto-approve
 
   upload_site:
