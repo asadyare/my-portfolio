@@ -1,1 +1,0 @@
-{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"acm","Source":"./modules/acm","Dir":"modules/acm"},{"Key":"cloudfront","Source":"./modules/cloudfront","Dir":"modules/cloudfront"},{"Key":"dns","Source":"./modules/dns","Dir":"modules/dns"},{"Key":"s3","Source":"./modules/s3","Dir":"modules/s3"}]}
