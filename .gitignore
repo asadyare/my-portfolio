@@ -26,3 +26,4 @@ dist-ssr
 .terraform.lock.hcl
 terraform.tfstate
 terraform.tfstate.backup
+crash.log
