@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+    }
+  }
+}
+
 resource "aws_cloudfront_distribution" "cdn" {
 enabled = true
 

@@ -1,5 +1,5 @@
 aws_region = "us-east-1"
-aws_profile = "default"
+
 
 project_name = "asad-portfolio"
 bucket_name = "my-devsecops-portfolio-bucket"
