@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+    }
+  }
+}
+
 locals {
   dvo = {
     for dvo in aws_acm_certificate.cert.domain_validation_options:
