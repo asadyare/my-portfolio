@@ -157,7 +157,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Sync build files to S3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        run: npm install
+      - name: Build frontend
+        run: npm run build
+
+      - name: upload to S3
         run: aws s3 sync ./dist s3://$S3_BUCKET_NAME --delete
-
-
+        
