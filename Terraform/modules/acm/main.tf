@@ -1,9 +1,14 @@
 terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
     }
   }
+}
+
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 }
 
 locals {
@@ -25,7 +30,7 @@ resource "aws_acm_certificate" "cert" {
 }
 
 resource "aws_route53_record" "cert_validation" {
-  provider = aws
+  provider = aws.us_east_1
   for_each = local.dvo
 
   zone_id = var.hosted_zone_id
