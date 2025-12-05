@@ -1,0 +1,16 @@
+[
+  {
+    "name": "Terraform AWS Setup",
+    "description": "Infrastructure as Code for AWS using Terraform.",
+    "github": "https://github.com/asadyare/terraform-aws-setup",
+    "tools": ["Terraform", "AWS", " CI/CD"],
+    "badges": ["DevSecOps", " IaC"]
+  },
+  {
+    "name": "Dockerized Node App",
+    "description": "Containerized Node.js app with GitHub Actions.",
+    "github": "https://github.com/asadyare/docker-node-app",
+    "tools": ["Node.js", "Docker", "GitHub Actions"],
+    "badges": ["Automation", "Security"]
+  }
+]
