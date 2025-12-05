@@ -105,19 +105,36 @@ jobs:
         if: matrix.task == 'trivy'
         run: |
           sudo apt-get update
-          sudo apt-get install wget
-          wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/download/v0.55.2/trivy_0.55.2_Linux-64bit.deb
-          sudo dpkg -i trivy.deb
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
 
-      - name: Run Trivy
+      - name: Trivy filesystem scan
         if: matrix.task == 'trivy'
-        run: trivy fs . --format sarif --severity HIGH,CRITICAL --exit-code 1 --output trivy-results.sarif
+        run: trivy fs . --format table --severity HIGH,CRITICAL --exit-code 1 --output trivy-results.sarif
+        
+      - name: Biuld image for Trivy 
+        if: matrix.task == 'trivy'
+        run: |
+          docker build -t ${{ github.repository }}:trivy-${{ github.run_id}} -f frontend/Dockerfile frontend
+
+      - name: Trivy image scan
+        if: matrix.task == 'trivy'
+        run: trivy image --format sarif --severity HIGH,CRITICAL --exit-code 1 --output trivy-image-results.sarif ${{ github.repository }}:trivy-${{ github.run_id}}
+        
+      - name: combine Trivy SARIF files
+        if: matrix.task == 'trivy'
+        run: |
+          jq -s 'reduce .[] as $item ({}; . + $item)' trivy-results.sarif trivy-image-results.sarif > trivy-results-combined.sarif 
+
 
       - name: Upload Trivy SARIF
         if: matrix.task == 'trivy'
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: trivy-results.sarif
+          sarif_file: trivy-results-combined.sarif
 
   terraform_deploy:
     name: Terraform Deploy
