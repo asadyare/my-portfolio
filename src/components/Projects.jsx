@@ -10,7 +10,7 @@ const items = [
 
 
 return (
-<section className="py-10">
+<section className="py-12">
 <h2 className="text-2xl font-bold text-primary-500">Projects</h2>
 <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 {items.map((it) => (
