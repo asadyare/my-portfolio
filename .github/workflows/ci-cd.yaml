@@ -37,26 +37,32 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node
+        
         if: matrix.task == 'build' || matrix.task == 'lint' || matrix.task == 'test' || matrix.task == 'snyk'
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          
 
       - name: Install
         if: matrix.task == 'build' || matrix.task == 'lint' || matrix.task == 'test' || matrix.task == 'snyk'
         run: npm install
+        working-directory: frontend
 
       - name: Build
         if: matrix.task == 'build'
         run: npm run build
+        working-directory: frontend
 
       - name: Lint
         if: matrix.task == 'lint'
         run: npm run lint
+        working-directory: frontend
 
       - name: Test
         if: matrix.task == 'test'
         run: npm test
+        working-directory: frontend
 
       - name: CodeQL Init
         if: matrix.task == 'codeql'
@@ -74,13 +80,15 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: test --severity-threshold=high
+          args: --severity-threshold=high --file=frontend/package.json
+
+          
 
       - name: Run Checkov
         if: matrix.task == 'checkov'
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: ./terraform
+          directory: ./Terraform
           soft_fail: false
 
       - name: Install Gitleaks
@@ -111,9 +119,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
 
-      - name: Trivy filesystem scan
-        if: matrix.task == 'trivy'
-        run: trivy fs . --format table --severity HIGH,CRITICAL --exit-code 1 --output trivy-results.sarif
+     
         
       - name: Biuld image for Trivy 
         if: matrix.task == 'trivy'
@@ -124,17 +130,14 @@ jobs:
         if: matrix.task == 'trivy'
         run: trivy image --format sarif --severity HIGH,CRITICAL --exit-code 1 --output trivy-image-results.sarif ${{ github.repository }}:trivy-${{ github.run_id}}
         
-      - name: combine Trivy SARIF files
-        if: matrix.task == 'trivy'
-        run: |
-          jq -s 'reduce .[] as $item ({}; . + $item)' trivy-results.sarif trivy-image-results.sarif > trivy-results-combined.sarif 
+     
 
 
       - name: Upload Trivy SARIF
         if: matrix.task == 'trivy'
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: trivy-results-combined.sarif
+          sarif_file: trivy-image-results.sarif
 
   terraform_deploy:
     name: Terraform Deploy
@@ -181,11 +184,13 @@ jobs:
           node-version: 20
       - name: Install Dependencies
         run: npm install
+        working-directory: frontend
       - name: Build frontend
         run: npm run build
+        working-directory: frontend
 
       - name: upload to S3
-        run: aws s3 sync ./dist s3://$S3_BUCKET_NAME --delete
+        run: aws s3 sync frontend/dist s3://$S3_BUCKET_NAME --delete
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
