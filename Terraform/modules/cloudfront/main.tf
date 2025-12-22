@@ -45,8 +45,8 @@ data "aws_iam_policy_document" "waf_logging" {
 resource "aws_cloudfront_origin_access_identity" "oai" {
   comment = "OAI for CloudFront to access S3"
 }
-resource "aws_wafv2_web_acl" "cf" {
-  name        = "cf-web-acl"
+resource "aws_wafv2_web_acl" "log4j_protected" {
+  name        = "var.name-webacl"
   scope       = "CLOUDFRONT"
   description = "CloudFront WAF with AWS managed rules including Log4j protection"
 
@@ -94,21 +94,21 @@ resource "aws_wafv2_web_acl" "cf" {
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "cf-web-acl"
+    metric_name                = "var.name-webacl"
     sampled_requests_enabled   = true
   }
 }
 
 
 resource "aws_wafv2_web_acl_logging_configuration" "cf" {
-  resource_arn = aws_wafv2_web_acl.cf.arn
+  resource_arn = aws_wafv2_web_acl.log4j_protected.arn
   log_destination_configs = [var.waf_log_group_arn]
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
   enabled             = true
   default_root_object = "index.html"
-  web_acl_id          = aws_wafv2_web_acl.cf.arn
+  web_acl_id          = aws_wafv2_web_acl.log4j_protected.arn
 
   origin {
     domain_name = var.primary_bucket_domain
@@ -156,14 +156,16 @@ resource "aws_cloudfront_distribution" "cdn" {
     geo_restriction {
       restriction_type = "whitelist"
       locations        = ["GB"]
-    }
+      }
   }
 
-  viewer_certificate {
+viewer_certificate {
     acm_certificate_arn      = var.certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
+
+  
 
   logging_config {
     bucket          = var.logs_bucket_domain
