@@ -31,63 +31,59 @@ resource "aws_cloudfront_response_headers_policy" "security" {
 }
 
 resource "aws_wafv2_web_acl" "cf" {
-  name  = "cloudfront-waf"
-  scope = "CLOUDFRONT"
+  name        = "cf-web-acl"
+  scope       = "CLOUDFRONT"
+  description = "CloudFront WAF with AWS managed rules including Log4j protection"
 
   default_action {
     allow {}
   }
 
   rule {
-    name     = "AWSManagedRulesCommonRuleSet"
-    priority = 1
-
-    override_action {
-      none {}
-    }
-
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesCommonRuleSet"
-        vendor_name = "AWS"
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "common"
-      sampled_requests_enabled   = true
-    }
-  }
-
-  rule {
     name     = "AWSManagedRulesKnownBadInputsRuleSet"
-    priority = 2
-
+    priority = 1
     override_action {
       none {}
     }
-
     statement {
       managed_rule_group_statement {
         name        = "AWSManagedRulesKnownBadInputsRuleSet"
         vendor_name = "AWS"
       }
     }
-
     visibility_config {
+      sampled_requests_enabled = true
       cloudwatch_metrics_enabled = true
-      metric_name                = "log4j"
-      sampled_requests_enabled   = true
+      metric_name = "AWSManagedRulesKnownBadInputsRuleSet"
+    }
+  }
+
+  rule {
+    name     = "AWSManagedRulesLog4jRuleSet"
+    priority = 2
+    override_action {
+      none {}
+    }
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesLog4jRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+    visibility_config {
+      sampled_requests_enabled    = true
+      cloudwatch_metrics_enabled  = true
+      metric_name                 = "AWSManagedRulesLog4jRuleSet"
     }
   }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "cloudfront-waf"
+    metric_name                = "cf-web-acl"
     sampled_requests_enabled   = true
   }
 }
+
 
 resource "aws_wafv2_web_acl_logging_configuration" "cf" {
   resource_arn = aws_wafv2_web_acl.cf.arn

@@ -8,6 +8,7 @@ terraform {
 
 data "aws_caller_identity" "current" {}
 
+# KMS key for S3 encryption
 resource "aws_kms_key" "s3" {
   description             = "KMS key for S3 encryption"
   deletion_window_in_days = 30
@@ -29,43 +30,112 @@ resource "aws_kms_key" "s3" {
   })
 }
 
+# Primary site bucket
 resource "aws_s3_bucket" "site" {
   bucket = var.bucket_name
   tags   = var.tags
 }
 
-resource "aws_s3_bucket_notification" "site" {
-  bucket = aws_s3_bucket.site.id
-
-  eventbridge = true
-}
-
+# Logs bucket
 resource "aws_s3_bucket" "logs" {
   bucket = "${var.bucket_name}-logs"
   tags   = var.tags
 }
 
-resource "aws_s3_bucket_notification" "logs" {
-  bucket = aws_s3_bucket.logs.id
-
-  eventbridge = true
+# Replica bucket for cross-region replication
+resource "aws_s3_bucket" "logs_replica" {
+  bucket = "${var.bucket_name}-logs-replica"
+  tags   = var.tags
+  region = "us-east-1"
 }
 
+# Replication IAM Role
+resource "aws_iam_role" "replication" {
+  name = "s3-replication-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "s3.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "replication" {
+  name = "s3-replication-policy"
+  role = aws_iam_role.replication.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObjectVersion",
+          "s3:GetObjectVersionAcl",
+          "s3:GetObjectVersionTagging"
+        ]
+        Resource = [
+          "${aws_s3_bucket.site.arn}/*",
+          "${aws_s3_bucket.logs.arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ReplicateObject",
+          "s3:ReplicateDelete",
+          "s3:ReplicateTags"
+        ]
+        Resource = [
+          "${aws_s3_bucket.logs_replica.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+# Enable replication for site bucket
 resource "aws_s3_bucket_replication_configuration" "site" {
   bucket = aws_s3_bucket.site.id
-  role  = aws_iam_role.replication.arn
+  role   = aws_iam_role.replication.arn
 
   rule {
+    id     = "replicate-site-to-replica"
     status = "Enabled"
 
     destination {
-      bucket        = var.replica_bucket_arn
+      bucket        = aws_s3_bucket.logs_replica.arn
       storage_class = "STANDARD"
     }
+
+    filter { prefix = "" }
   }
 }
 
+# Enable replication for logs bucket
+resource "aws_s3_bucket_replication_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  role   = aws_iam_role.replication.arn
 
+  rule {
+    id     = "replicate-logs-to-replica"
+    status = "Enabled"
+
+    destination {
+      bucket        = aws_s3_bucket.logs_replica.arn
+      storage_class = "STANDARD"
+    }
+
+    filter { prefix = "" }
+  }
+}
+
+# Enable public access block
 resource "aws_s3_bucket_public_access_block" "site" {
   bucket = aws_s3_bucket.site.id
 
@@ -100,6 +170,7 @@ resource "aws_s3_bucket_versioning" "logs" {
   }
 }
 
+# Server-side encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
   bucket = aws_s3_bucket.site.id
 
@@ -122,6 +193,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   }
 }
 
+# Lifecycle rules
 resource "aws_s3_bucket_lifecycle_configuration" "site" {
   bucket = aws_s3_bucket.site.id
 
@@ -155,9 +227,22 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     }
   }
 }
+
+# Enable access logging
 resource "aws_s3_bucket_logging" "site" {
   bucket = aws_s3_bucket.site.id
 
   target_bucket = aws_s3_bucket.logs.id
   target_prefix = "site-logs/"
+}
+
+# Event notifications
+resource "aws_s3_bucket_notification" "site" {
+  bucket = aws_s3_bucket.site.id
+  eventbridge = true
+}
+
+resource "aws_s3_bucket_notification" "logs" {
+  bucket = aws_s3_bucket.logs.id
+  eventbridge = true
 }
