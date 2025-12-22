@@ -34,10 +34,37 @@ resource "aws_s3_bucket" "site" {
   tags   = var.tags
 }
 
+resource "aws_s3_bucket_notification" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  eventbridge = true
+}
+
 resource "aws_s3_bucket" "logs" {
   bucket = "${var.bucket_name}-logs"
   tags   = var.tags
 }
+
+resource "aws_s3_bucket_notification" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  eventbridge = true
+}
+
+resource "aws_s3_bucket_replication_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+  role  = aws_iam_role.replication.arn
+
+  rule {
+    status = "Enabled"
+
+    destination {
+      bucket        = var.replica_bucket_arn
+      storage_class = "STANDARD"
+    }
+  }
+}
+
 
 resource "aws_s3_bucket_public_access_block" "site" {
   bucket = aws_s3_bucket.site.id

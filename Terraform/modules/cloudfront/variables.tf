@@ -3,3 +3,6 @@ variable "certificate_arn" { type = string }
 variable "domain_name" { type = string }
 variable "tags" { type = map(string) }
 variable "logs_bucket_domain" { type = string }
+variable "failover_bucket_domain" { type = string }
+variable "waf_log_group_arn" { type = string }
+variable "primary_bucket_domain" { type = string }

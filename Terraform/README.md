@@ -100,3 +100,52 @@ Route53 resolves the domain to CloudFront.
 CloudFront fetches files from the S3 origin.
 
 CloudFront serves the response over HTTPS.
+
+## Architecture overview description
+
+Traffic enters through CloudFront with HTTPS enforced.
+CloudFront attaches a WAFv2 Web ACL using AWS managed rule groups.
+Requests route to an S3 origin group with a primary and failover bucket.
+Failover triggers only on origin error status codes.
+ACM provides certificates from us east 1 for CloudFront.
+Response headers policy enforces HSTS and secure headers.
+Access logs flow to a dedicated S3 logs bucket.
+WAF logs stream to a central logging destination.
+Route53 hosts public DNS with query logging and DNSSEC enabled.
+S3 buckets use KMS encryption, versioning, lifecycle rules, replication, and EventBridge notifications.
+
+## Compliance mapping table
+
+Control area. Implementation. Reference standard.
+
+Transport security.
+TLS v1.2_2021 enforced via CloudFront and ACM.
+CIS AWS 1.2. NIST SC 13.
+
+Web application firewall.
+AWS managed WAF rules with Log4j protection and logging.
+CIS AWS 2.10. NIST SI 10.
+
+Logging and monitoring.
+CloudFront, WAF, S3, and Route53 logs enabled.
+CIS AWS 2.5. NIST AU 2.
+
+Data encryption at rest.
+S3 encrypted with customer managed KMS keys.
+CIS AWS 2.7. NIST SC 12.
+
+Key management.
+KMS rotation enabled and scoped policies applied.
+CIS AWS 2.8. NIST KM 1.
+
+Resilience and availability.
+CloudFront origin failover with multi bucket S3.
+CIS AWS 3.1. NIST CP 10.
+
+DNS protection.
+Route53 DNS query logging and DNSSEC signing.
+CIS AWS 3.6. NIST SC 20.
+
+Event monitoring.
+S3 EventBridge notifications enabled.
+CIS AWS 2.4. NIST SI 4.
