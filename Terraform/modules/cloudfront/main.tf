@@ -33,7 +33,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
 data "aws_iam_policy_document" "waf_logging" {
   statement {
     actions   = ["wafv2:PutLoggingConfiguration"]
-    resources = ["*"]
+     resources = [aws_wafv2_web_acl.cf_acl.arn]  # restrict to the actual WebACL
     effect    = "Allow"
     principals {
       type        = "Service"
