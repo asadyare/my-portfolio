@@ -64,7 +64,21 @@ Includes linting, Snyk vulnerability scan, and CodeQL analysis
 
 Pre-commit hooks prevent secrets from being committed
 
+Latest Checkov scan output in scans/checkov/checkov-latest.txt
+
 Badges
+
+## Security model summary
+
+Detailed threat model available at docs/security/threat-model.md
+
+## Security review and controls
+
+Full control review and rationale at docs/security/security-review.md
+
+## Audit checklist
+
+Step by step verification guide at docs/security/audit-checklist.md
 
 ## Screenshots
 

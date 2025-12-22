@@ -55,16 +55,43 @@ resource "aws_wafv2_web_acl" "cf" {
 
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name = "commonRules"
-      sampled_requests_enabled = true
+      metric_name                = "common"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
+    name     = "AWSManagedRulesKnownBadInputsRuleSet"
+    priority = 2
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "log4j"
+      sampled_requests_enabled   = true
     }
   }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name = "cloudfrontWAF"
-    sampled_requests_enabled = true
+    metric_name                = "cloudfront-waf"
+    sampled_requests_enabled   = true
   }
+}
+
+resource "aws_wafv2_web_acl_logging_configuration" "cf" {
+  resource_arn = aws_wafv2_web_acl.cf.arn
+  log_destination_configs = [var.waf_log_group_arn]
 }
 
 resource "aws_cloudfront_distribution" "cdn" {
@@ -73,12 +100,33 @@ resource "aws_cloudfront_distribution" "cdn" {
   web_acl_id          = aws_wafv2_web_acl.cf.arn
 
   origin {
-    domain_name = var.bucket_domain
-    origin_id   = "s3-origin"
+    domain_name = var.primary_bucket_domain
+    origin_id   = "primary-s3"
+  }
+
+  origin {
+    domain_name = var.failover_bucket_domain
+    origin_id   = "failover-s3"
+  }
+
+  origin_group {
+    origin_id = "s3-group"
+
+    failover_criteria {
+      status_codes = [403, 404, 500, 502]
+    }
+
+    member {
+      origin_id = "primary-s3"
+    }
+
+    member {
+      origin_id = "failover-s3"
+    }
   }
 
   default_cache_behavior {
-    target_origin_id       = "s3-origin"
+    target_origin_id       = "s3-group"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
@@ -114,3 +162,4 @@ resource "aws_cloudfront_distribution" "cdn" {
 
   tags = var.tags
 }
+
