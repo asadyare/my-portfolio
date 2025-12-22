@@ -6,101 +6,131 @@ terraform {
   }
 }
 
-resource "aws_s3_bucket" "site" {
-bucket = var.bucket_name
-tags = var.tags
-}
-
-resource "aws_s3_bucket_versioning" "versioning" {
-bucket = aws_s3_bucket.site.id
-versioning_configuration {
-  status = "Enabled"
-}
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
-bucket = aws_s3_bucket.site.id
-
-rule {
-id = "lifecycle-cleanup"
-status = "Enabled"
-
-expiration {
-  days = 365
-}
-}
-}
-
-resource "aws_s3_bucket_public_access_block" "block" {
-bucket = aws_s3_bucket.site.id
-block_public_acls = true
-block_public_policy = true
-ignore_public_acls = true
-restrict_public_buckets = true
-}
-
-resource "aws_s3_bucket_website_configuration" "website" {
-bucket = aws_s3_bucket.site.id
-}
+data "aws_caller_identity" "current" {}
 
 resource "aws_kms_key" "s3" {
-description = "KMS key for S3 bucket default encryption"
-deletion_window_in_days = 30
+  description             = "KMS key for S3 encryption"
+  deletion_window_in_days = 30
+  enable_key_rotation     = true
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid = "EnableRootPermissions"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      }
+    ]
+  })
 }
 
-resource "aws_s3_bucket_server_side_encryption_configuration" "sse" {
-bucket = aws_s3_bucket.site.id
-
-rule {
-apply_server_side_encryption_by_default {
-sse_algorithm = "aws:kms"
-kms_master_key_id = aws_kms_key.s3.arn
-}
-}
+resource "aws_s3_bucket" "site" {
+  bucket = var.bucket_name
+  tags   = var.tags
 }
 
 resource "aws_s3_bucket" "logs" {
-bucket = "${var.bucket_name}-logs"
-
-tags = var.tags
+  bucket = "${var.bucket_name}-logs"
+  tags   = var.tags
 }
 
-resource "aws_s3_bucket_logging" "site_logs" {
-bucket = aws_s3_bucket.site.id
-target_bucket = aws_s3_bucket.logs.id
-target_prefix = "s3-access-logs/"
+resource "aws_s3_bucket_public_access_block" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-resource "aws_iam_role" "replication" {
-name = "${var.bucket_name}-replication-role"
-assume_role_policy = jsonencode({
-Version = "2012-10-17"
-Statement = [
-{
-Action = "sts:AssumeRole"
-Effect = "Allow"
-Principal = {
-Service = "s3.amazonaws.com"
-}
-}
-]
-})
+resource "aws_s3_bucket_public_access_block" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_replication_configuration" "replication" {
-bucket = aws_s3_bucket.site.id
-role = aws_iam_role.replication.arn
+resource "aws_s3_bucket_versioning" "site" {
+  bucket = aws_s3_bucket.site.id
 
-rule {
-id = "replicate-all"
-status = "Enabled"
-destination {
-bucket = aws_s3_bucket.replica.arn
-storage_class = "STANDARD"
-}
-}
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
-output "bucket_name" {
-  value = aws_s3_bucket.site.bucket
+resource "aws_s3_bucket_versioning" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.s3.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.s3.arn
+      sse_algorithm     = "aws:kms"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  rule {
+    id     = "site-lifecycle"
+    status = "Enabled"
+
+    expiration {
+      days = 365
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    id     = "logs-lifecycle"
+    status = "Enabled"
+
+    expiration {
+      days = 180
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+resource "aws_s3_bucket_logging" "site" {
+  bucket = aws_s3_bucket.site.id
+
+  target_bucket = aws_s3_bucket.logs.id
+  target_prefix = "site-logs/"
 }
