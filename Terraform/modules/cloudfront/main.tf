@@ -30,6 +30,21 @@ resource "aws_cloudfront_response_headers_policy" "security" {
   }
 }
 
+data "aws_iam_policy_document" "waf_logging" {
+  statement {
+    actions   = ["wafv2:PutLoggingConfiguration"]
+    resources = ["*"]
+    effect    = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["wafv2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_cloudfront_origin_access_identity" "oai" {
+  comment = "OAI for CloudFront to access S3"
+}
 resource "aws_wafv2_web_acl" "cf" {
   name        = "cf-web-acl"
   scope       = "CLOUDFRONT"
