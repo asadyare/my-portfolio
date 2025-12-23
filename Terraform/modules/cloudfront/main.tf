@@ -42,137 +42,62 @@ data "aws_iam_policy_document" "waf_logging" {
   }
 }
 
-resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "OAI for CloudFront to access S3"
+resource "aws_cloudfront_origin_access_control" "this" {
+name = "${var.name}-oac"
+origin_access_control_origin_type = "s3"
+signing_behavior = "always"
+signing_protocol = "sigv4"
 }
-resource "aws_wafv2_web_acl" "log4j_protected" {
-  name        = "var.name-webacl"
-  scope       = "CLOUDFRONT"
-  description = "CloudFront WAF with AWS managed rules including Log4j protection"
 
-  default_action {
-    allow {}
-  }
+resource "aws_cloudfront_distribution" "this" {
+enabled = true
+is_ipv6_enabled = true
+price_class = var.price_class
 
-  rule {
-    name     = "AWSManagedRulesKnownBadInputsRuleSet"
-    priority = 1
-    override_action {
-      none {}
-    }
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesKnownBadInputsRuleSet"
-        vendor_name = "AWS"
-      }
-    }
-    visibility_config {
-      sampled_requests_enabled = true
-      cloudwatch_metrics_enabled = true
-      metric_name = "AWSManagedRulesKnownBadInputsRuleSet"
-    }
-  }
+origin {
+domain_name = var.s3_bucket_domain_name
+origin_id = "s3-origin"
+origin_access_control_id = aws_cloudfront_origin_access_control.this.id
+}
 
-  rule {
-    name     = "AWSManagedRulesLog4jRuleSet"
-    priority = 2
-    override_action {
-      none {}
-    }
-    statement {
-      managed_rule_group_statement {
-        name        = "AWSManagedRulesLog4jRuleSet"
-        vendor_name = "AWS"
-      }
-    }
-    visibility_config {
-      sampled_requests_enabled    = true
-      cloudwatch_metrics_enabled  = true
-      metric_name                 = "AWSManagedRulesLog4jRuleSet"
-    }
-  }
+default_root_object = "index.html"
 
-  visibility_config {
-    cloudwatch_metrics_enabled = true
-    metric_name                = "var.name-webacl"
-    sampled_requests_enabled   = true
+default_cache_behavior {
+target_origin_id = "s3-origin"
+viewer_protocol_policy = "redirect-to-https"
+
+allowed_methods = [
+  "GET",
+  "HEAD"
+]
+
+cached_methods = [
+  "GET",
+  "HEAD"
+]
+
+forwarded_values {
+  query_string = false
+
+  cookies {
+    forward = "none"
   }
 }
 
 
-resource "aws_wafv2_web_acl_logging_configuration" "cf" {
-  resource_arn = aws_wafv2_web_acl.log4j_protected.arn
-  log_destination_configs = [var.waf_log_group_arn]
 }
 
-resource "aws_cloudfront_distribution" "cdn" {
-  enabled             = true
-  default_root_object = "index.html"
-  web_acl_id          = aws_wafv2_web_acl.log4j_protected.arn
-
-  origin {
-    domain_name = var.primary_bucket_domain
-    origin_id   = "primary-s3"
-  }
-
-  origin {
-    domain_name = var.failover_bucket_domain
-    origin_id   = "failover-s3"
-  }
-
-  origin_group {
-    origin_id = "s3-group"
-
-    failover_criteria {
-      status_codes = [403, 404, 500, 502]
-    }
-
-    member {
-      origin_id = "primary-s3"
-    }
-
-    member {
-      origin_id = "failover-s3"
-    }
-  }
-
-  default_cache_behavior {
-    target_origin_id       = "s3-group"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
-
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "whitelist"
-      locations        = ["GB"]
-      }
-  }
+restrictions {
+geo_restriction {
+restriction_type = "none"
+}
+}
 
 viewer_certificate {
-    acm_certificate_arn      = var.certificate_arn
-    ssl_support_method       = "sni-only"
-    minimum_protocol_version = "TLSv1.2_2021"
-  }
-
-  
-
-  logging_config {
-    bucket          = var.logs_bucket_domain
-    include_cookies = false
-    prefix          = "cloudfront/"
-  }
-
-  tags = var.tags
+acm_certificate_arn = var.acm_certificate_arn
+ssl_support_method = "sni-only"
+minimum_protocol_version = "TLSv1.2_2021"
 }
 
+web_acl_id = aws_wafv2_web_acl.this.arn
+}

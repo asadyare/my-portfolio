@@ -1,7 +1,11 @@
-output "cf_domain" {
-value = aws_cloudfront_distribution.cdn.domain_name
+output "distribution_id" {
+value = aws_cloudfront_distribution.this.id
 }
 
-output "cf_zone_id" {
-value = aws_cloudfront_distribution.cdn.hosted_zone_id
+output "distribution_domain_name" {
+value = aws_cloudfront_distribution.this.domain_name
+}
+
+output "waf_web_acl_arn" {
+value = aws_wafv2_web_acl.this.arn
 }
