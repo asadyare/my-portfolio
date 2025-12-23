@@ -105,9 +105,9 @@ rule {
   }
 }
 
-  rule {
-  name     = "AWSManagedRulesSQLiRuleSet"
-  priority = 40
+rule {
+  name     = "AWSManagedRulesAdminProtectionRuleSet"
+  priority = 50
 
   override_action {
     none {}
@@ -115,35 +115,14 @@ rule {
 
   statement {
     managed_rule_group_statement {
-      name        = "AWSManagedRulesSQLiRuleSet"
+      name        = "AWSManagedRulesAdminProtectionRuleSet"
       vendor_name = "AWS"
     }
   }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "SQLiRuleSet"
-    sampled_requests_enabled   = true
-  }
-}
-  rule {
-  name     = "AWSManagedRulesAmazonIpReputationList"
-  priority = 30
-
-  override_action {
-    none {}
-  }
-
-  statement {
-    managed_rule_group_statement {
-      name        = "AWSManagedRulesAmazonIpReputationList"
-      vendor_name = "AWS"
-    }
-  }
-
-  visibility_config {
-    cloudwatch_metrics_enabled = true
-    metric_name                = "AmazonIpReputationList"
+    metric_name                = "AdminProtection"
     sampled_requests_enabled   = true
   }
 }
