@@ -4,7 +4,7 @@ log_destination_configs = [var.waf_log_destination_arn]
 }
 
 resource "aws_wafv2_web_acl" "this" {
-name = "${var.name}-web-acl"
+name = "${var.name}-waf"
 scope = "CLOUDFRONT"
 
 default_action {
@@ -13,13 +13,13 @@ allow {}
 
 visibility_config {
 cloudwatch_metrics_enabled = true
-metric_name = "${var.name}-web-acl"
+metric_name = "${var.name}-waf"
 sampled_requests_enabled = true
 }
 
 rule {
-name = "AWSManagedRulesKnownBadInputs"
-priority = 1
+name = "AWSManagedRulesJavaRuleSet"
+priority = 10
 
 override_action {
   none {}
@@ -27,40 +27,15 @@ override_action {
 
 statement {
   managed_rule_group_statement {
-    name        = "AWSManagedRulesKnownBadInputsRuleSet"
+    name        = "AWSManagedRulesJavaRuleSet"
     vendor_name = "AWS"
   }
 }
 
 visibility_config {
   cloudwatch_metrics_enabled = true
-  metric_name                = "KnownBadInputs"
+  metric_name                = "AWSManagedRulesJavaRuleSet"
   sampled_requests_enabled   = true
-}
-
-
-}
-
-rule {
-name = "AWSManagedRulesJavaRuleSet"
-priority = 2
-
-override_action {
-none {}
-}
-
-statement {
-managed_rule_group_statement {
-name = "AWSManagedRulesJavaRuleSet"
-vendor_name = "AWS"
+  }
 }
 }
-
-visibility_config {
-cloudwatch_metrics_enabled = true
-metric_name = "AWSManagedRulesJavaRuleSet"
-sampled_requests_enabled = true
-}
-}
-}
-  

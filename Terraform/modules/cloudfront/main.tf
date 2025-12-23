@@ -66,6 +66,7 @@ bucket = var.logging_bucket_domain_name
 include_cookies = false
 prefix = var.logging_prefix
 }
+web_acl_id = aws_wafv2_web_acl.this.arn
 enabled = true
 is_ipv6_enabled = true
 price_class = var.price_class
@@ -101,18 +102,22 @@ origin_id = "failover-s3"
 default_root_object = "index.html"
 
 default_cache_behavior {
-response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
 target_origin_id = "s3-origin-group"
 viewer_protocol_policy = "redirect-to-https"
 allowed_methods = ["GET", "HEAD"]
 cached_methods = ["GET", "HEAD"]
+response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
 forwarded_values {
 query_string = false
 cookies {
 forward = "none"
+  }
+ }
 }
-}
-}
+
+depends_on = [ 
+aws_wafv2_web_acl.this 
+]
 
 restrictions {
 geo_restriction {
@@ -126,6 +131,4 @@ acm_certificate_arn = var.acm_certificate_arn
 ssl_support_method = "sni-only"
 minimum_protocol_version = "TLSv1.2_2021"
 }
-
-web_acl_id = aws_wafv2_web_acl.this.arn
 }
