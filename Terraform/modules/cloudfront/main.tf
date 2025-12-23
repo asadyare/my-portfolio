@@ -61,15 +61,15 @@ signing_protocol = "sigv4"
 }
 
 resource "aws_cloudfront_distribution" "this" {
-logging_config {
-bucket = var.logging_bucket_domain_name
-include_cookies = false
-prefix = var.logging_prefix
-}
-web_acl_id = aws_wafv2_web_acl.this.arn
+# logging_config {
+# bucket = var.logging_bucket_domain_name
+# include_cookies = false
+# prefix = var.logging_prefix
+# }
+# web_acl_id = aws_wafv2_web_acl.this.arn
 enabled = true
-is_ipv6_enabled = true
-price_class = var.price_class
+# is_ipv6_enabled = true
+# price_class = var.price_class
 
 origin {
 domain_name = var.s3_bucket_domain_name
@@ -115,10 +115,6 @@ forward = "none"
  }
 }
 
-depends_on = [ 
-aws_wafv2_web_acl.this 
-]
-
 restrictions {
 geo_restriction {
 locations = "GB"
@@ -127,8 +123,9 @@ restriction_type = "whitelist"
 }
 
 viewer_certificate {
-acm_certificate_arn = var.acm_certificate_arn
-ssl_support_method = "sni-only"
-minimum_protocol_version = "TLSv1.2_2021"
+cloudfront_default_certificate = true
+# acm_certificate_arn = var.acm_certificate_arn
+# ssl_support_method = "sni-only"
+# minimum_protocol_version = "TLSv1.2_2021"
 }
 }

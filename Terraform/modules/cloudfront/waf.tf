@@ -1,7 +1,7 @@
-resource "aws_wafv2_web_acl_logging_configuration" "this" {
-resource_arn = aws_wafv2_web_acl.this.arn
-log_destination_configs = [var.waf_log_destination_arn]
-}
+# resource "aws_wafv2_web_acl_logging_configuration" "this" {
+# resource_arn = aws_wafv2_web_acl.this.arn
+# log_destination_configs = [var.waf_log_destination_arn]
+# }
 
 resource "aws_wafv2_web_acl" "this" {
 name = "${var.name}-waf"
