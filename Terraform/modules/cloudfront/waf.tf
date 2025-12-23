@@ -21,9 +21,9 @@ rule {
 name = "AWSManagedRulesJavaRuleSet"
 priority = 10
 
-# action {
-#   none {}
-# }
+action {
+  block {}
+}
 
 statement {
   managed_rule_group_statement {
@@ -43,9 +43,9 @@ rule {
     name     = "AWSManagedRulesKnownBadInputsRuleSet"
     priority = 20
 
-    # action {
-    #   none {}
-    # }
+    action {
+      block {}
+    }
 
     statement {
       managed_rule_group_statement {
