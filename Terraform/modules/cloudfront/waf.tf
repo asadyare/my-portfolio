@@ -82,5 +82,69 @@ rule {
       sampled_requests_enabled   = true
     }
   }
+
+  rule {
+  name     = "AWSManagedRulesAmazonIpReputationList"
+  priority = 30
+
+  override_action {
+    none {}
+  }
+
+  statement {
+    managed_rule_group_statement {
+      name        = "AWSManagedRulesAmazonIpReputationList"
+      vendor_name = "AWS"
+    }
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "AmazonIpReputationList"
+    sampled_requests_enabled   = true
+  }
 }
 
+  rule {
+  name     = "AWSManagedRulesSQLiRuleSet"
+  priority = 40
+
+  override_action {
+    none {}
+  }
+
+  statement {
+    managed_rule_group_statement {
+      name        = "AWSManagedRulesSQLiRuleSet"
+      vendor_name = "AWS"
+    }
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "SQLiRuleSet"
+    sampled_requests_enabled   = true
+  }
+}
+  rule {
+  name     = "AWSManagedRulesAmazonIpReputationList"
+  priority = 30
+
+  override_action {
+    none {}
+  }
+
+  statement {
+    managed_rule_group_statement {
+      name        = "AWSManagedRulesAmazonIpReputationList"
+      vendor_name = "AWS"
+    }
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "AmazonIpReputationList"
+    sampled_requests_enabled   = true
+  }
+}
+}
