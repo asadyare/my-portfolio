@@ -117,7 +117,7 @@ forward = "none"
 
 restrictions {
 geo_restriction {
-locations = "GB"
+locations = "US"
 restriction_type = "whitelist"
 }
 }

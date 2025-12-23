@@ -18,33 +18,55 @@ sampled_requests_enabled = true
 }
 
 rule {
-name = "AWSManagedRulesJavaRuleSet"
-priority = 10
+    name     = "AWSManagedRulesCommonRuleSet"
+    priority = 1
 
-action {
-  block {}
-}
+    override_action {
+      none {}
+    }
 
-statement {
-  managed_rule_group_statement {
-    name        = "AWSManagedRulesJavaRuleSet"
-    vendor_name = "AWS"
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesCommonRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "CommonRuleSet"
+      sampled_requests_enabled   = true
+    }
   }
-}
 
-visibility_config {
-  cloudwatch_metrics_enabled = true
-  metric_name                = "AWSManagedRulesJavaRuleSet"
-  sampled_requests_enabled   = true
+  rule {
+    name     = "AWSManagedRulesJavaRuleSet"
+    priority = 10
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesJavaRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "JavaRuleSet"
+      sampled_requests_enabled   = true
+    }
   }
-}
 
-rule {
+  rule {
     name     = "AWSManagedRulesKnownBadInputsRuleSet"
     priority = 20
 
-    action {
-      block {}
+    override_action {
+      none {}
     }
 
     statement {
