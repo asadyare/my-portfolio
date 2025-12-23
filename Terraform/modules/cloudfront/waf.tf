@@ -38,4 +38,27 @@ visibility_config {
   sampled_requests_enabled   = true
   }
 }
+
+rule {
+    name     = "AWSManagedRulesKnownBadInputsRuleSet"
+    priority = 20
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesKnownBadInputsRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "KnownBadInputs"
+      sampled_requests_enabled   = true
+    }
+  }
 }
+
