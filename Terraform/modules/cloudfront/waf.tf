@@ -8,7 +8,7 @@ name = "${var.name}-waf"
 scope = "CLOUDFRONT"
 
 default_action {
-allow {}
+block {}
 }
 
 visibility_config {
