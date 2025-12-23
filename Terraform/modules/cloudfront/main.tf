@@ -7,29 +7,40 @@ terraform {
 }
 
 resource "aws_cloudfront_response_headers_policy" "security" {
-  name = "security-headers"
+name = "${var.name}-security-headers"
 
-  security_headers_config {
-    content_security_policy {
-      content_security_policy = "default-src https:"
-      override = true
-    }
-
-    strict_transport_security {
-      access_control_max_age_sec = 63072000
-      include_subdomains = true
-      preload = true
-      override = true
-    }
-
-    xss_protection {
-      protection = true
-      mode_block = true
-      override = true
-    }
-  }
+security_headers_config {
+content_security_policy {
+content_security_policy = "default-src 'self'"
+override = true
 }
 
+strict_transport_security {
+  access_control_max_age_sec = 63072000
+  include_subdomains         = true
+  preload                    = true
+  override                   = true
+}
+
+xss_protection {
+  protection = true
+  mode_block = true
+  override   = true
+}
+
+frame_options {
+  frame_option = "DENY"
+  override     = true
+}
+
+referrer_policy {
+  referrer_policy = "same-origin"
+  override        = true
+}
+
+
+}
+}
 data "aws_iam_policy_document" "waf_logging" {
   statement {
     actions   = ["wafv2:PutLoggingConfiguration"]
@@ -50,41 +61,57 @@ signing_protocol = "sigv4"
 }
 
 resource "aws_cloudfront_distribution" "this" {
+logging_config {
+bucket = var.logging_bucket_domain_name
+include_cookies = false
+prefix = var.logging_prefix
+}
 enabled = true
 is_ipv6_enabled = true
 price_class = var.price_class
 
 origin {
 domain_name = var.s3_bucket_domain_name
-origin_id = "s3-origin"
+origin_id = "primary-s3"
 origin_access_control_id = aws_cloudfront_origin_access_control.this.id
+}
+
+origin {
+domain_name = var.failover_bucket_domain_name
+origin_id = "failover-s3"
+origin_access_control_id = aws_cloudfront_origin_access_control.this.id
+}
+
+origin_group {
+origin_id = "s3-origin-group"
+
+failover_criteria {
+status_codes = [403, 404, 500, 502, 503, 504]
+}
+
+member {
+origin_id = "primary-s3"
+}
+
+member {
+origin_id = "failover-s3"
+}
 }
 
 default_root_object = "index.html"
 
 default_cache_behavior {
-target_origin_id = "s3-origin"
+response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
+target_origin_id = "s3-origin-group"
 viewer_protocol_policy = "redirect-to-https"
-
-allowed_methods = [
-  "GET",
-  "HEAD"
-]
-
-cached_methods = [
-  "GET",
-  "HEAD"
-]
-
+allowed_methods = ["GET", "HEAD"]
+cached_methods = ["GET", "HEAD"]
 forwarded_values {
-  query_string = false
-
-  cookies {
-    forward = "none"
-  }
+query_string = false
+cookies {
+forward = "none"
 }
-
-
+}
 }
 
 restrictions {

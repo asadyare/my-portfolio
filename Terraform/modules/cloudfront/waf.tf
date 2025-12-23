@@ -1,3 +1,8 @@
+resource "aws_wafv2_web_acl_logging_configuration" "this" {
+resource_arn = aws_wafv2_web_acl.this.arn
+log_destination_configs = [var.waf_log_destination_arn]
+}
+
 resource "aws_wafv2_web_acl" "this" {
 name = "${var.name}-web-acl"
 scope = "CLOUDFRONT"
@@ -37,26 +42,25 @@ visibility_config {
 }
 
 rule {
-name = "AWSManagedRulesJavaLog4j"
+name = "AWSManagedRulesJavaRuleSet"
 priority = 2
 
 override_action {
-  none {}
+none {}
 }
 
 statement {
-  managed_rule_group_statement {
-    name        = "AWSManagedRulesJavaRuleSet"
-    vendor_name = "AWS"
-  }
+managed_rule_group_statement {
+name = "AWSManagedRulesJavaRuleSet"
+vendor_name = "AWS"
+}
 }
 
 visibility_config {
-  cloudwatch_metrics_enabled = true
-  metric_name                = "JavaLog4j"
-  sampled_requests_enabled   = true
-}
-
-
+cloudwatch_metrics_enabled = true
+metric_name = "AWSManagedRulesJavaRuleSet"
+sampled_requests_enabled = true
 }
 }
+}
+  
