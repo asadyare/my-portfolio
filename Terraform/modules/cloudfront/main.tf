@@ -68,8 +68,8 @@ prefix = var.logging_prefix
 }
 # web_acl_id = aws_wafv2_web_acl.this.arn
 enabled = true
-# is_ipv6_enabled = true
-# price_class = var.price_class
+is_ipv6_enabled = true
+price_class = var.price_class
 
 origin {
 domain_name = var.s3_bucket_domain_name
