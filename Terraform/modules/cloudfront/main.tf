@@ -89,7 +89,8 @@ forwarded_values {
 
 restrictions {
 geo_restriction {
-restriction_type = "none"
+locations = "GB"
+restriction_type = "whitelist"
 }
 }
 
