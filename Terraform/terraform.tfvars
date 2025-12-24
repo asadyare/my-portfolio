@@ -1,18 +1,31 @@
 aws_region = "us-east-1"
 
-
-project_name = "asad-portfolio"
-bucket_name = "asad-portfolio-bucket"
-replica_bucket_arn = "arn:aws:s3:::asad-portfolio-replica-bucket"
-log_bucket_name = "asad-portfolio-log-bucket"
-domain_name = "asad-portfolio.com"
-acm_certificate_arn = "arn:aws:acm:us-east-1:733366528696:certificate/f60d94b3-0f31-4456-b882-46b9885d00ef"
-cloudfront_arn = "arn:aws:cloudfront::733366528696:distribution/E1MKU8LSS8EY9R"
-
-hosted_zone_id = "Z03947583S3PF4TCIOKDK"
-
+domain_name    = "asad-portfolio.com"
+hosted_zone_id = "Z01561301YNX8SQG6GY3D"
 tags = {
-owner = "asad"
-project = "portfolio"
-env = "prod"
+  owner   = "asad"
+  project = "portfolio"
+  env     = "prod"
 }
+
+primary_buckets = [
+  {
+    name            = "my-devsecops-portfolio-bucket"
+    type            = "primary"
+    replication_arn = "arn:aws:s3:::my-devsecops-portfolio-failover-bucket"
+  }
+]
+
+failover_buckets = [
+  {
+    name            = "my-devsecops-portfolio-failover-bucket"
+    type            = "failover"
+    replication_arn = ""
+  }
+]
+
+log_buckets = [
+  {
+    name = "my-devsecops-portfolio-logs-bucket"
+  }
+]

@@ -6,35 +6,64 @@ terraform {
   }
 }
 
+# resource "aws_kms_key" "dnssec" {
+#   enable_key_rotation = true
+#   description         = "KMS key for Route53 DNSSEC"
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Sid = "EnableRootPermissions",
+#         Effect = "Allow",
+#         Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" },
+#         Action = "kms:*",
+#         Resource = "*"
+#       }
+#     ]
+#   })
+#   tags = var.tags
+# }
+
 data "aws_caller_identity" "current" {}
 
-resource "aws_kms_key" "dns" {
-  description             = "Route53 query logging key"
-  deletion_window_in_days = 10
-  enable_key_rotation     = true
+data "aws_region" "current" {}
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        }
-        Action   = "kms:*"
-        Resource = "*"
-      }
-    ]
-  })
+resource "aws_kms_key" "route53_logs" {
+description = "KMS key for Route53 query logs"
+enable_key_rotation = true
+deletion_window_in_days = 30
 
-  tags = var.tags
+policy = jsonencode({
+Version = "2012-10-17"
+Statement = [
+{
+Sid = "RootAccess"
+Effect = "Allow"
+Principal = {
+AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
 }
+Action = "kms:"
+Resource = "*"
+},
+{
+Sid = "AllowCloudWatchLogs"
+Effect = "Allow"
+Principal = {
+Service = "logs.${data.aws_region.current.region}.amazonaws.com"
+}
+Action = [
+"kms:Encrypt",
+"kms:Decrypt",
+"kms:ReEncrypt*",
+"kms:GenerateDataKey*",
+"kms:DescribeKey"
+]
+Resource = "*"
+}
+]
+})
 
-resource "aws_cloudwatch_log_group" "route53" {
-  name              = "/aws/route53/${var.domain_name}"
-  retention_in_days = 365
-  kms_key_id        = aws_kms_key.dns.arn
-  tags              = var.tags
+tags = var.tags
 }
 
 resource "aws_route53_zone" "primary" {
@@ -42,20 +71,27 @@ resource "aws_route53_zone" "primary" {
   tags = var.tags
 }
 
-resource "aws_route53_query_log" "this" {
+resource "aws_route53_query_log" "dns" {
   cloudwatch_log_group_arn = aws_cloudwatch_log_group.route53.arn
-  zone_id                 = aws_route53_zone.primary.zone_id
+  zone_id                  = aws_route53_zone.primary.zone_id
 }
 
-resource "aws_route53_key_signing_key" "dnssec" {
-  hosted_zone_id               = aws_route53_zone.primary.zone_id
-  key_management_service_arn   = aws_kms_key.dns.arn
-  name                          = "dnssec"
+resource "aws_cloudwatch_log_group" "route53" {
+  name              = "/aws/route53/${var.domain_name}"
+  retention_in_days = 365
+  kms_key_id = aws_kms_key.route53_logs.arn
+  tags              = var.tags
+
+  depends_on = [
+aws_kms_key.route53_logs
+]
 }
 
-resource "aws_route53_hosted_zone_dnssec" "dnssec" {
-  hosted_zone_id = aws_route53_zone.primary.zone_id
-}
+
+
+# resource "aws_route53_hosted_zone_dnssec" "dnssec" {
+#   hosted_zone_id = aws_route53_zone.primary.zone_id
+# }
 
 resource "aws_route53_record" "root" {
   zone_id = aws_route53_zone.primary.zone_id
@@ -80,6 +116,7 @@ resource "aws_route53_record" "www" {
     evaluate_target_health = false
   }
 }
+
 
 
 

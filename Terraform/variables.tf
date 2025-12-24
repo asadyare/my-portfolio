@@ -1,22 +1,31 @@
-variable "aws_region" {
-  type = string
+variable "aws_region" { type = string }
+variable "domain_name" { type = string }
+variable "hosted_zone_id" { type = string }
+variable "tags" { type = map(string) }
+
+variable "primary_buckets" {
+  type = list(object({
+    name            = string
+    type            = string
+    replication_arn = string
+  }))
 }
 
-variable "project_name" {
-  type = string
+variable "failover_buckets" {
+  type = list(object({
+    name            = string
+    type            = string
+    replication_arn = string
+  }))
 }
 
-variable "domain_name" {
-  type = string
+variable "log_buckets" {
+  type = list(object({
+    name = string
+  }))
 }
 
-variable "waf_log_arn" {
-  type = string
-}
-
-variable "tags" {
-  type = map(string)
-}
+variable "acm_certificate_arn" { type = string }
 
 
 
