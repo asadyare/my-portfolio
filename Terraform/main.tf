@@ -40,9 +40,10 @@ module "acm" {
 module "cloudfront" {
   source = "./modules/cloudfront"
 
-  s3_bucket_domain_name        = module.s3_primary.bucket_regional_domain_names["primary-site-bucket"]
-  failover_bucket_domain_name  = module.s3_failover.bucket_regional_domain_names["replica-site-bucket"]
+  s3_bucket_domain_names       = [module.s3_primary.bucket_regional_domain_names["primary-site-bucket"]]
+  failover_bucket_domain_names = [module.s3_failover.bucket_regional_domain_names["replica-site-bucket"]]
   logging_bucket_domain_name   = module.logs.bucket_regional_domain_names["logs-bucket"]
+  logging_prefix               = "cloudfront-logs"
   acm_certificate_arn          = module.acm.certificate_arn
   name                         = var.domain_name
   waf_log_destination_arn      = var.waf_log_destination_arn
