@@ -9,3 +9,11 @@ value = aws_cloudfront_distribution.this.domain_name
 output "waf_web_acl_arn" {
 value = aws_wafv2_web_acl.this.arn
 }
+
+output "cf_domain" {
+  value = aws_cloudfront_distribution.this.domain_name
+}
+
+output "cf_zone_id" {
+  value = aws_cloudfront_distribution.this.hosted_zone_id
+}

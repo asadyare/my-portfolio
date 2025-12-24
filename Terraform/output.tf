@@ -1,19 +1,23 @@
-output "certificate_arn" {
-value = module.acm.certificate_arn
-}
-
-output "cloudfront_domain" {
-value = module.cloudfront.cf_domain
+output "cloudfront_domain_name" {
+  value = module.cloudfront.cf_domain
 }
 
 output "cloudfront_zone_id" {
-value = module.cloudfront.cf_zone_id
+  value = module.cloudfront.cf_zone_id
 }
 
-output "s3_bucket_domain" {
-value = module.s3.bucket_regional_domain_name
+output "primary_s3_bucket_domains" {
+  value = module.s3_primary.bucket_regional_domain_names
 }
 
-output "dns_zone_id" {
-value = module.dns.zone_id
+output "failover_s3_bucket_domains" {
+  value = module.s3_failover.bucket_regional_domain_names
+}
+
+output "log_s3_bucket_domains" {
+  value = module.logs.bucket_regional_domain_names
+}
+
+output "acm_certificate_arn" {
+  value = module.acm.certificate_arn
 }
