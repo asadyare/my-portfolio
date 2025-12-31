@@ -1,4 +1,10 @@
 {
+  "name": "my-portfolio",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint ."
+  },
   "devDependencies": {
     "@babel/eslint-parser": "^7.28.5",
     "eslint": "^9.39.2"
