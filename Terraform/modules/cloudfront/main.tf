@@ -55,46 +55,44 @@ resource "aws_wafv2_web_acl" "cf" {
   }
 
   rule {
-    name     = "AWSManagedRulesKnownBadInputsRuleSet"
+    name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
     priority = 1
-    override_action {
-      none {}
-    }
+
     statement {
       managed_rule_group_statement {
         name        = "AWSManagedRulesKnownBadInputsRuleSet"
         vendor_name = "AWS"
       }
     }
+
     visibility_config {
-      sampled_requests_enabled = true
       cloudwatch_metrics_enabled = true
-      metric_name = "AWSManagedRulesKnownBadInputsRuleSet"
+      metric_name                = "knownbadinputs"
+      sampled_requests_enabled   = true
     }
   }
 
   rule {
-    name     = "AWSManagedRulesLog4jRuleSet"
+    name     = "AWS-AWSManagedRulesAnonymousIpList"
     priority = 2
-    override_action {
-      none {}
-    }
+
     statement {
       managed_rule_group_statement {
-        name        = "AWSManagedRulesLog4jRuleSet"
+        name        = "AWSManagedRulesAnonymousIpList"
         vendor_name = "AWS"
       }
     }
+
     visibility_config {
-      sampled_requests_enabled    = true
-      cloudwatch_metrics_enabled  = true
-      metric_name                 = "AWSManagedRulesLog4jRuleSet"
+      cloudwatch_metrics_enabled = true
+      metric_name                = "anonymousiplist"
+      sampled_requests_enabled   = true
     }
   }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "cf-web-acl"
+    metric_name                = var.name
     sampled_requests_enabled   = true
   }
 }
@@ -155,7 +153,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   restrictions {
     geo_restriction {
       restriction_type = "whitelist"
-      locations        = ["GB"]
+      locations        = ["GB,US"]
     }
   }
 
