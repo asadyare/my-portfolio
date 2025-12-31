@@ -30,6 +30,8 @@ resource "aws_s3_bucket" "buckets" {
 
   bucket = each.value.name
   tags   = var.tags
+
+  depends_on = [ aws_kms_key.s3 ]
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "buckets" {
@@ -85,11 +87,14 @@ resource "aws_s3_bucket_public_access_block" "buckets" {
 }
 
 resource "aws_s3_bucket_logging" "buckets" {
-  for_each = aws_s3_bucket.buckets
+  for_each = {
+    for k, v in aws_s3_bucket.buckets :
+    k => v if k != "asad-portfolio-logs-bucket"
+  }
 
   bucket        = each.value.id
-  target_bucket = aws_s3_bucket.buckets["logs"].id
-  target_prefix = "${each.key}-logs/"
+  target_bucket = aws_s3_bucket.buckets["asad-portfolio-logs-bucket"].id
+  target_prefix = "${each.key}/"
 }
 
 resource "aws_s3_bucket_notification" "buckets" {
@@ -98,9 +103,9 @@ resource "aws_s3_bucket_notification" "buckets" {
   bucket      = each.value.id
   eventbridge = true
 }
-
+# checkov:skip=CKV_AWS_144:Replication not required for this environmentresource "aws_s3_bucket_replication_configuration" "buckets" {
 resource "aws_s3_bucket_replication_configuration" "buckets" {
-  for_each = { for b in var.buckets : b.name => b if b.replication_arn != "" }
+ for_each = { for b in var.buckets : b.name => b if b.replication_arn != "" }
 
   bucket = aws_s3_bucket.buckets[each.key].id
   role   = each.value.replication_arn

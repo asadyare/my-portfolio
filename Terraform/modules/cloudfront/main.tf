@@ -112,7 +112,8 @@ resource "aws_cloudfront_distribution" "this" {
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-
+    
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.this.id
     forwarded_values {
       query_string = false
       cookies { forward = "none" }
