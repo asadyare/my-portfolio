@@ -105,7 +105,7 @@ jobs:
 
       - name: Run Gitleaks
         if: matrix.task == 'gitleaks'
-        run: gitleaks detect --source . --no-banner --no-git --report-format sarif --report-path gitleaks-results.sarif
+        run: gitleaks detect --source . --no-banner --no-git --config gitleaks.toml --report-format sarif --report-path gitleaks-results.sarif
 
       - name: Upload Gitleaks SARIF
         if: matrix.task == 'gitleaks'
