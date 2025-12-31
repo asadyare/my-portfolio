@@ -76,6 +76,8 @@ resource "aws_cloudfront_origin_access_control" "this" {
   signing_protocol                  = "sigv4"
 }
 
+# checkov:skip=CKV_AWS_374:Geo restriction is intentionally permissive for public website
+# checkov:skip=CKV2_AWS_32:Response headers policy attached explicitly
 resource "aws_cloudfront_distribution" "this" {
   enabled             = true
   is_ipv6_enabled     = true
