@@ -38,3 +38,13 @@ zone_id = var.cf_zone_id
 evaluate_target_health = false
 }
 }
+
+resource "aws_cloudwatch_log_group" "route53" {
+name = "/aws/route53/query-logs"
+retention_in_days = 30
+}
+
+resource "aws_kms_key" "route53" {
+description = "Route53 query logs key"
+enable_key_rotation = true
+}
