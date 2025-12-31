@@ -14,5 +14,5 @@ repos:
         language: system
         pass_filenames: false
         types: [javascript, jsx]
-        args: ["frontend/src/**/*.{js,jsx}"]  # or "." for all files in repo
+        args: ["frontend/src/**/*.{jsx,js}"]  # or "." for all files in repo
 
