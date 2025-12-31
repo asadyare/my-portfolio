@@ -41,10 +41,28 @@ evaluate_target_health = false
 
 resource "aws_cloudwatch_log_group" "route53" {
 name = "/aws/route53/query-logs"
-retention_in_days = 30
+retention_in_days = 365
+tags = var.tags
+kms_key_id = aws_kms_key.route53.arn
 }
+
 
 resource "aws_kms_key" "route53" {
 description = "Route53 query logs key"
 enable_key_rotation = true
+
+ policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowRootAccount"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      }
+    ]
+  })
 }
+
+data "aws_caller_identity" "current" {}
