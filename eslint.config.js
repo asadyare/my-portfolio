@@ -2,11 +2,16 @@ import babelParser from "@babel/eslint-parser";
 
 export default [
   {
-    files: ["*.js", "*.jsx"],
+    files: ["frontend/src/**/*.jsx"],
     languageOptions: {
       parser: babelParser,
       parserOptions: {
-        requireConfigFile: false
+        requireConfigFile: false,
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true
+        }
       }
     },
     rules: {
