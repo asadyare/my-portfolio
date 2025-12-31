@@ -25,13 +25,13 @@ resource "aws_kms_key" "s3" {
   })
 }
 
-# checkov:skip=CKV_AWS_145:Encryption enforced via aws_s3_bucket_server_side_encryption_configuration
-# checkov:skip=CKV_AWS_18:Access logging configured via aws_s3_bucket_logging
-# checkov:skip=CKV2_AWS_62:Event notifications enabled via aws_s3_bucket_notification
-# checkov:skip=CKV2_AWS_6:Public access block enforced via aws_s3_bucket_public_access_block
-# checkov:skip=CKV2_AWS_61:Lifecycle rules defined via aws_s3_bucket_lifecycle_configuration
-# checkov:skip=CKV_AWS_21:Versioning enabled via aws_s3_bucket_versioning
-# checkov:skip=CKV_AWS_144:Replication not required for this environment
+ # checkov:skip=CKV_AWS_145:Encryption enforced via aws_s3_bucket_server_side_encryption_configuration
+ # checkov:skip=CKV_AWS_18:Access logging configured via aws_s3_bucket_logging
+ # checkov:skip=CKV2_AWS_62:Event notifications enabled via aws_s3_bucket_notification
+ # checkov:skip=CKV2_AWS_6:Public access block enforced via aws_s3_bucket_public_access_block
+ # checkov:skip=CKV2_AWS_61:Lifecycle rules defined via aws_s3_bucket_lifecycle_configuration
+ # checkov:skip=CKV_AWS_21:Versioning enabled via aws_s3_bucket_versioning
+ # checkov:skip=CKV_AWS_144:Replication not required for this environment
 resource "aws_s3_bucket" "buckets" {
   for_each = { for b in var.buckets : b.name => b }
 
@@ -110,7 +110,7 @@ resource "aws_s3_bucket_notification" "buckets" {
   bucket      = each.value.id
   eventbridge = true
 }
-# checkov:skip=CKV_AWS_144:Replication not required for this environmentresource "aws_s3_bucket_replication_configuration" "buckets" {
+  # checkov:skip=CKV_AWS_144:Replication not required for this environmentresource "aws_s3_bucket_replication_configuration" "buckets" {
 resource "aws_s3_bucket_replication_configuration" "buckets" {
  for_each = { for b in var.buckets : b.name => b if b.replication_arn != "" }
 
