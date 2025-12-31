@@ -14,5 +14,5 @@ repos:
         language: system
         pass_filenames: false
         types: [javascript, jsx]
-        args: ["my-portfolio/**/*.js,cjs"]  # or "." for all files in repo
+        args: ["my-portfolio/frontend/*.js,cjs"]  # or "." for all files in repo
 
