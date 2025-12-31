@@ -12,6 +12,7 @@ repos:
         name: ESLint Code Lint
         entry: node_modules/.bin/eslint
         language: system
+        pass_filenames: false
         types: [javascript, jsx]
         args: ["my-portfolio/**/*.js,cjs"]  # or "." for all files in repo
 
