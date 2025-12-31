@@ -124,7 +124,7 @@ jobs:
       - name: Biuld image for Trivy 
         if: matrix.task == 'trivy'
         run: |
-          docker build -t ${{ github.repository }}:trivy-${{ github.run_id}} -f Dockerfile .
+          docker build -t ${{ github.repository }}:trivy-${{ github.run_id}} -f frontend/Dockerfile .
 
       - name: Trivy image scan
         if: matrix.task == 'trivy'
