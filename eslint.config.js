@@ -7,17 +7,14 @@ export default [
       parser: babelParser,
       parserOptions: {
         requireConfigFile: false,
-        ecmaVersion: "latest",
-        sourceType: "module",
-        ecmaFeatures: {
-          jsx: true
+        babelOptions: {
+          presets: ["@babel/preset-react"]
         }
       }
     },
     rules: {
       "no-unused-vars": "warn",
-      "no-console": "off",
-      "semi": ["error", "always"]
+      "no-console": "off"
     }
   }
 ];
