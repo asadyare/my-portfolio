@@ -13,5 +13,5 @@ repos:
         entry: node_modules/.bin/eslint
         language: system
         types: [javascript, jsx]
-        args: ["."]  # or "." for all files in repo
+        args: ["my-portfolio/**/*.js,cjs"]  # or "." for all files in repo
 
