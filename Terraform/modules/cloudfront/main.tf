@@ -1,59 +1,25 @@
 terraform {
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-    }
+    aws = { source = "hashicorp/aws" }
   }
 }
 
-resource "aws_cloudfront_response_headers_policy" "security" {
-  name = "security-headers"
-
-  security_headers_config {
-    content_security_policy {
-      content_security_policy = "default-src https:"
-      override = true
-    }
-
-    strict_transport_security {
-      access_control_max_age_sec = 63072000
-      include_subdomains = true
-      preload = true
-      override = true
-    }
-
-    xss_protection {
-      protection = true
-      mode_block = true
-      override = true
-    }
-  }
+resource "aws_cloudwatch_log_group" "waf" {
+  name              = "/aws/waf/cloudfront"
+  retention_in_days = 365
+  kms_key_id        = var.kms_key_arn
+  tags              = var.tags
 }
 
-data "aws_iam_policy_document" "waf_logging" {
-  statement {
-    actions   = ["wafv2:PutLoggingConfiguration"]
-     resources = [aws_wafv2_web_acl.cf_acl.arn]  # restrict to the actual WebACL
-    effect    = "Allow"
-    principals {
-      type        = "Service"
-      identifiers = ["wafv2.amazonaws.com"]
+resource "aws_wafv2_web_acl" "this" {
+  name  = "${var.name}-waf"
+  scope = "CLOUDFRONT"
+
+  default_action { 
+    allow {} 
     }
-  }
-}
-
-resource "aws_cloudfront_origin_access_identity" "oai" {
-  comment = "OAI for CloudFront to access S3"
-}
-resource "aws_wafv2_web_acl" "cf" {
-  name        = "cf-web-acl"
-  scope       = "CLOUDFRONT"
-  description = "CloudFront WAF with AWS managed rules including Log4j protection"
-
-  default_action {
-    allow {}
-  }
-
+    
+  
   rule {
     name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
     priority = 1
@@ -98,62 +64,64 @@ resource "aws_wafv2_web_acl" "cf" {
 }
 
 
-resource "aws_wafv2_web_acl_logging_configuration" "cf" {
-  resource_arn = aws_wafv2_web_acl.cf.arn
-  log_destination_configs = [var.waf_log_group_arn]
+resource "aws_wafv2_web_acl_logging_configuration" "this" {
+  resource_arn            = aws_wafv2_web_acl.this.arn
+  log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
 }
 
-resource "aws_cloudfront_distribution" "cdn" {
+resource "aws_cloudfront_origin_access_control" "this" {
+  name                              = "${var.name}-oac"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+resource "aws_cloudfront_distribution" "this" {
   enabled             = true
+  is_ipv6_enabled     = true
+  comment             = var.name
   default_root_object = "index.html"
-  web_acl_id          = aws_wafv2_web_acl.cf.arn
+  web_acl_id          = aws_wafv2_web_acl.this.arn
+  aliases             = [var.domain_name]
 
   origin {
-    domain_name = var.primary_bucket_domain
-    origin_id   = "primary-s3"
+    domain_name              = var.primary_bucket_domain
+    origin_id                = "primary"
+    origin_access_control_id = aws_cloudfront_origin_access_control.this.id
   }
 
   origin {
-    domain_name = var.failover_bucket_domain
-    origin_id   = "failover-s3"
+    domain_name              = var.failover_bucket_domain
+    origin_id                = "failover"
+    origin_access_control_id = aws_cloudfront_origin_access_control.this.id
   }
 
   origin_group {
-    origin_id = "s3-group"
+    origin_id = "failover-group"
 
     failover_criteria {
       status_codes = [403, 404, 500, 502]
     }
 
-    member {
-      origin_id = "primary-s3"
-    }
-
-    member {
-      origin_id = "failover-s3"
-    }
+    member { origin_id = "primary" }
+    member { origin_id = "failover" }
   }
 
   default_cache_behavior {
-    target_origin_id       = "s3-group"
+    target_origin_id       = "failover-group"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
 
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.security.id
-
     forwarded_values {
       query_string = false
-      cookies {
-        forward = "none"
-      }
+      cookies { forward = "none" }
     }
   }
 
   restrictions {
     geo_restriction {
-      restriction_type = "whitelist"
-      locations        = ["GB,US"]
+      restriction_type = "none"
     }
   }
 
@@ -164,11 +132,9 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   logging_config {
-    bucket          = var.logs_bucket_domain
-    include_cookies = false
-    prefix          = "cloudfront/"
+    bucket = var.logs_bucket_domain
+    prefix = "cloudfront/"
   }
 
   tags = var.tags
 }
-

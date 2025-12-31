@@ -1,27 +1,25 @@
 terraform {
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-    }
+    aws = { source = "hashicorp/aws" }
   }
 }
 
 data "aws_caller_identity" "current" {}
 
 resource "aws_kms_key" "s3" {
-  description             = "KMS key for S3 encryption"
+  description         = "KMS key for S3 encryption"
   deletion_window_in_days = 30
-  enable_key_rotation     = true
+  enable_key_rotation = true
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "EnableRootPermissions"
-        Effect = "Allow"
+        Sid       = "EnableRootPermissions"
+        Effect    = "Allow"
         Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
-        Action   = "kms:*"
-        Resource = "*"
+        Action    = "kms:*"
+        Resource  = "*"
       }
     ]
   })
@@ -51,6 +49,7 @@ resource "aws_s3_bucket_versioning" "buckets" {
   for_each = aws_s3_bucket.buckets
 
   bucket = each.value.id
+
   versioning_configuration {
     status = "Enabled"
   }
@@ -60,19 +59,25 @@ resource "aws_s3_bucket_lifecycle_configuration" "buckets" {
   for_each = aws_s3_bucket.buckets
 
   bucket = each.value.id
+
   rule {
     id     = "${each.key}-lifecycle"
     status = "Enabled"
 
-    expiration { days = 365 }
-    abort_incomplete_multipart_upload { days_after_initiation = 7 }
+    expiration {
+      days = 365
+    }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
   }
 }
 
 resource "aws_s3_bucket_public_access_block" "buckets" {
   for_each = aws_s3_bucket.buckets
 
-  bucket = each.value.id
+  bucket                  = each.value.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -90,7 +95,7 @@ resource "aws_s3_bucket_logging" "buckets" {
 resource "aws_s3_bucket_notification" "buckets" {
   for_each = aws_s3_bucket.buckets
 
-  bucket = each.value.id
+  bucket      = each.value.id
   eventbridge = true
 }
 
@@ -108,3 +113,4 @@ resource "aws_s3_bucket_replication_configuration" "buckets" {
     }
   }
 }
+
