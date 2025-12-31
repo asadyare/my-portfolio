@@ -96,7 +96,7 @@ jobs:
       - name: Install Gitleaks
         if: matrix.task == 'gitleaks'
         run: |
-          # git ls-files | grep tfstate
+          git ls-files | grep tfstate
           git rev-list --count HEAD
           wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
           tar -xzf gitleaks_8.18.4_linux_x64.tar.gz
