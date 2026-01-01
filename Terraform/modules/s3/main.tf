@@ -26,6 +26,7 @@ resource "aws_kms_key" "s3" {
 }
 
 resource "aws_s3_bucket" "logs" {
+   # checkov:skip=CKV_AWS_145:Encryption enforced via aws_s3_bucket_server_side_encryption_configuration
    # checkov:skip=CKV2_AWS_62:Event notifications enabled via aws_s3_bucket_notification
    # checkov:skip=CKV_AWS_18:Access logging configured via aws_s3_bucket_logging
    # checkov:skip=CKV2_AWS_61:Lifecycle rules defined via 
