@@ -58,8 +58,8 @@ Effect = "Allow"
 Principal = {
 AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
 }
-Action = "kms:"
-Resource = ""
+Action = "kms:*"
+Resource = "*"
 },
 {
 Sid = "AllowCloudWatchLogs"
@@ -74,10 +74,10 @@ Action = [
 "kms:GenerateDataKey*",
 "kms:DescribeKey"
 ]
-Resource = ""
+Resource = "*"
 Condition = {
 ArnLike = {
-"kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:"
+"kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:*"
 }
 }
 }
