@@ -59,6 +59,10 @@ resource "aws_kms_key" "route53_dnssec" {
 }
 
 data "aws_iam_policy_document" "route53_dnssec" {
+  #Check: CKV_AWS_356: "Ensure no IAM policies documents allow "*" as a statement's resource for restrictable actions"
+  #Check: CKV_AWS_109: "Ensure IAM policies does not allow permissions management / resource exposure without constraints"
+  #Check: CKV_AWS_111: "Ensure IAM policies does not allow write access without constraints"
+	
   statement {
     sid = "AllowRoute53DNSSECService"
 
