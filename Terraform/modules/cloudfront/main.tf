@@ -4,6 +4,13 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = "us-east-1"
+}
+
+data "aws_caller_identity" "current" {}
+
+
 resource "aws_cloudfront_response_headers_policy" "this" {
   name = "security-headers-policy"
 
@@ -37,10 +44,51 @@ resource "aws_cloudfront_response_headers_policy" "this" {
   }
 }
 
+
+resource "aws_kms_key" "waf_logs" {
+description = "KMS key for WAF CloudWatch logs"
+enable_key_rotation = true
+
+policy = jsonencode({
+Version = "2012-10-17"
+Statement = [
+{
+Sid = "AllowAccountRoot"
+Effect = "Allow"
+Principal = {
+AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+}
+Action = "kms:"
+Resource = ""
+},
+{
+Sid = "AllowCloudWatchLogs"
+Effect = "Allow"
+Principal = {
+Service = "logs.us-east-1.amazonaws.com"
+}
+Action = [
+"kms:Encrypt",
+"kms:Decrypt",
+"kms:ReEncrypt*",
+"kms:GenerateDataKey*",
+"kms:DescribeKey"
+]
+Resource = ""
+Condition = {
+ArnLike = {
+"kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:us-east-1:${data.aws_caller_identity.current.account_id}:"
+}
+}
+}
+]
+})
+}
+
 resource "aws_cloudwatch_log_group" "waf" {
   name              = "/aws/waf/cloudfront"
   retention_in_days = 365
-  kms_key_id        = var.kms_key_arn
+  kms_key_id        = aws_kms_key.waf_logs.arn
   tags              = var.tags
 }
 
