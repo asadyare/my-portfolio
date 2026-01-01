@@ -22,6 +22,10 @@ output "route53_log_group_arn" {
   value = module.dns.route53_log_group_arn
 }
 
-output "route53_kms_key_arn" {
-  value = module.dns.route53_kms_key_arn
+# output "route53_kms_key_arn" {
+#   value = module.dns.route53_kms_key_arn
+# }
+
+output "route53_dnssec_kms_key_arn" {
+  value = aws_kms_key.route53_dnssec.arn 
 }
