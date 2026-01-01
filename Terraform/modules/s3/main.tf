@@ -25,6 +25,34 @@ resource "aws_kms_key" "s3" {
   })
 }
 
+resource "aws_s3_bucket" "logs" {
+  bucket = "asad-portfolio-logs-bucket"
+  tags   = var.tags
+}
+
+resource "aws_s3_bucket_ownership_controls" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "logs" {
+  depends_on = [aws_s3_bucket_ownership_controls.logs]
+
+  bucket = aws_s3_bucket.logs.id
+  acl    = "log-delivery-write"
+}
+
+
+resource "aws_s3_bucket_public_access_block" "logs" {
+  bucket                  = aws_s3_bucket.logs.id
+  block_public_acls       = false
+  block_public_policy     = true
+  ignore_public_acls      = false
+  restrict_public_buckets = true
+}
 resource "aws_s3_bucket" "buckets" {
   
  # checkov:skip=CKV_AWS_145:Encryption enforced via aws_s3_bucket_server_side_encryption_configuration
@@ -98,6 +126,7 @@ resource "aws_s3_bucket_logging" "buckets" {
   for_each = {
     for k, v in aws_s3_bucket.buckets :
     k => v if k != "asad-portfolio-logs-bucket"
+    
   }
 
   bucket        = each.value.id
