@@ -53,6 +53,7 @@ module "cloudfront" {
 # DNS Module
 module "dns" {
   source             = "./modules/dns"
+  
   domain_name        = var.domain_name
   cf_domain          = module.cloudfront.cf_domain
   cf_zone_id         = module.cloudfront.cf_zone_id
