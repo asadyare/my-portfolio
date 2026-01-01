@@ -25,3 +25,11 @@ variable "buckets" {
     replication_arn = string
   }))
 }
+
+variable "certificate_arn" {
+  type = string
+}
+
+variable "zone_id" {
+  type = string
+}
