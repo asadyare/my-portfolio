@@ -2,7 +2,7 @@ aws_region       = "us-east-1"
 name             = "asad-portfolio"
 project_name     = "asad-portfolio"
 domain_name      = "asad-portfolio.com"
-certificate_arn  = "arn:aws:acm:us-east-1:733366528696:certificate/e59a7ffc-1081-4b0e-b27e-04b439545d9e"
+certificate_arn  = "arn:aws:acm:us-east-1:733366528696:certificate/cf881b0d-b62b-4001-b242-25fd78657191"
 zone_id          = "Z09458031QK4UZP2UXBY5"
 
 tags = {

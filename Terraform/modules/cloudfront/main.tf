@@ -57,6 +57,10 @@ resource "aws_wafv2_web_acl" "this" {
     name     = "AWS-AWSManagedRulesKnownBadInputsRuleSet"
     priority = 1
 
+    override_action {
+  none {}
+}
+
     statement {
       managed_rule_group_statement {
         name        = "AWSManagedRulesKnownBadInputsRuleSet"
@@ -74,6 +78,10 @@ resource "aws_wafv2_web_acl" "this" {
   rule {
     name     = "AWS-AWSManagedRulesAnonymousIpList"
     priority = 2
+
+    override_action {
+  none {}
+}
 
     statement {
       managed_rule_group_statement {
