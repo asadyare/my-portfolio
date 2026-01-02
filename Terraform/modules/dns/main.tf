@@ -26,14 +26,26 @@ resource "aws_kms_key" "route53_logs" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "RootAccess"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
-        }
-        Action   = "kms:*"
-        Resource = "*"
-      }
+  "Sid": "AllowCloudWatchLogs",
+  "Effect": "Allow",
+  "Principal": {
+    "Service": "logs.amazonaws.com"
+  },
+  "Action": [
+    "kms:Encrypt",
+    "kms:Decrypt",
+    "kms:ReEncrypt*",
+    "kms:GenerateDataKey*",
+    "kms:DescribeKey"
+  ],
+  "Resource": "*",
+  "Condition": {
+    "StringEquals": {
+      "kms:EncryptionContext:aws:logs:arn": "arn:aws:logs:<region>:<account-id>:log-group:/aws/route53/query-logs"
+    }
+  }
+}
+      
     ]
   })
 }
