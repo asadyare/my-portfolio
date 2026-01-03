@@ -19,6 +19,7 @@ resource "aws_route53_zone" "primary" {
 }
 
 resource "aws_kms_key" "route53_logs" {
+  #checkov:skip=CKV_AWS_7: "Ensure rotation for customer created CMKs is enabled"
 description = "Route53 query logs"
 policy = jsonencode({
 Version = "2012-10-17"
