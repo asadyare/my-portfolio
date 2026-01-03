@@ -44,6 +44,7 @@ resource "aws_s3_bucket" "buckets" {
 }
 
 resource "aws_s3_bucket" "waf_logs" {
+  # checkov:skip=CKV_AWS_145:Encryption enforced via aws_s3_bucket_server_side_encryption_configuration
   # checkov:skip=CKV_AWS_18:Access logging configured via aws_s3_bucket_logging
  # checkov:skip=CKV2_AWS_62:Event notifications enabled via aws_s3_bucket_notification
  # checkov:skip=CKV2_AWS_6:Public access block enforced via aws_s3_bucket_public_access_block
