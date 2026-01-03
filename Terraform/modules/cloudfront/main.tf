@@ -99,6 +99,7 @@ resource "aws_cloudwatch_log_group" "waf" {
 }
 
 resource "aws_wafv2_web_acl" "this" {
+  provider = aws.use1
   name  = "${var.name}-waf"
   scope = "CLOUDFRONT"
 
@@ -160,6 +161,7 @@ resource "aws_wafv2_web_acl" "this" {
 
 
 resource "aws_wafv2_web_acl_logging_configuration" "this" {
+  provider = aws.use1
   resource_arn            = aws_wafv2_web_acl.this.arn
   log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
 }
