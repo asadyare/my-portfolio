@@ -32,7 +32,7 @@ module "acm" {
 # S3 Module
 module "s3" {
   source  = "./modules/s3"
-
+  name = var.name
   buckets = var.buckets
   tags    = var.tags
 }
