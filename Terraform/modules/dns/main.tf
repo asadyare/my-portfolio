@@ -19,35 +19,36 @@ resource "aws_route53_zone" "primary" {
 }
 
 resource "aws_kms_key" "route53_logs" {
-  description         = "Route53 query logs key"
-  enable_key_rotation = true
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-  "Sid": "AllowCloudWatchLogs",
-  "Effect": "Allow",
-  "Principal": {
-    "Service": "logs.amazonaws.com"
-  },
-  "Action": [
-    "kms:Encrypt",
-    "kms:Decrypt",
-    "kms:ReEncrypt*",
-    "kms:GenerateDataKey*",
-    "kms:DescribeKey"
-  ],
-  "Resource": "*",
-  "Condition": {
-    "StringEquals": {
-      "kms:EncryptionContext:aws:logs:arn": "arn:aws:logs:<region>:<account-id>:log-group:/aws/route53/query-logs"
-    }
-  }
+description = "Route53 query logs"
+policy = jsonencode({
+Version = "2012-10-17"
+Statement = [
+{
+Sid = "EnableRootAccess"
+Effect = "Allow"
+Principal = {
+AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
 }
-      
-    ]
-  })
+Action = "kms:*"
+Resource = "*"
+},
+{
+Sid = "AllowCloudWatchLogs"
+Effect = "Allow"
+Principal = {
+Service = "logs.amazonaws.com"
+}
+Action = [
+"kms:Encrypt",
+"kms:Decrypt",
+"kms:ReEncrypt*",
+"kms:GenerateDataKey*",
+"kms:DescribeKey"
+]
+Resource = "*"
+}
+]
+})
 }
 
 resource "aws_cloudwatch_log_group" "route53" {

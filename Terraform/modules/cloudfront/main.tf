@@ -85,7 +85,13 @@ ArnLike = {
 })
 }
 
+provider "aws" {
+  alias = "use1"
+  region = "us-east-1"
+  
+}
 resource "aws_cloudwatch_log_group" "waf" {
+  provider = aws.use1
   name              = "/aws/waf/cloudfront"
   retention_in_days = 365
   kms_key_id        = aws_kms_key.waf_logs.arn
