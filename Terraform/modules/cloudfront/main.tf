@@ -98,6 +98,30 @@ resource "aws_cloudwatch_log_group" "waf" {
   tags              = var.tags
 }
 
+resource "aws_cloudwatch_log_resource_policy" "waf" {
+provider = aws.use1
+
+policy_name = "waf-cloudfront-logging"
+
+policy_document = jsonencode({
+Version = "2012-10-17"
+Statement = [
+{
+Sid = "AllowWAFToWriteLogs"
+Effect = "Allow"
+Principal = {
+Service = "waf.amazonaws.com"
+}
+Action = [
+"logs:CreateLogStream",
+"logs:PutLogEvents"
+]
+Resource = "${aws_cloudwatch_log_group.waf.arn}:*"
+}
+]
+})
+}
+
 resource "aws_wafv2_web_acl" "this" {
   provider = aws.use1
   name  = "${var.name}-waf"
@@ -164,6 +188,10 @@ resource "aws_wafv2_web_acl_logging_configuration" "this" {
   provider = aws.use1
   resource_arn            = aws_wafv2_web_acl.this.arn
   log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
+  depends_on = [
+aws_cloudwatch_log_group.waf,
+aws_cloudwatch_log_resource_policy.waf
+]
 }
 
 resource "aws_cloudfront_origin_access_control" "this" {

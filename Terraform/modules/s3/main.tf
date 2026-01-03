@@ -48,7 +48,7 @@ resource "aws_s3_bucket_ownership_controls" "logs" {
   bucket = aws_s3_bucket.buckets["asad-portfolio-logs-bucket"].id
 
   rule {
-    object_ownership = "BucketOwnerPreferred"
+    object_ownership = "ObjectWriter"
   }
 }
 
