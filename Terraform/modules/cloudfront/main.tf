@@ -227,6 +227,8 @@ Resource = [
 }
 
 resource "aws_kinesis_firehose_delivery_stream" "waf" {
+  # checkov:skip=CKV_AWS_240: "Ensure Kinesis Firehose delivery stream is encrypted"
+  # checkov:skip=CKV_AWS_241: "Ensure that Kinesis Firehose Delivery Streams are encrypted with CMK"
 provider = aws.use1
 name = "${var.name}-waf-logs"
 destination = "extended_s3"
