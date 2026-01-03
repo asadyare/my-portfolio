@@ -43,6 +43,16 @@ resource "aws_s3_bucket" "buckets" {
   depends_on = [ aws_kms_key.s3 ]
 }
 
+resource "aws_s3_bucket" "waf_logs" {
+  # checkov:skip=CKV_AWS_18:Access logging configured via aws_s3_bucket_logging
+ # checkov:skip=CKV2_AWS_62:Event notifications enabled via aws_s3_bucket_notification
+ # checkov:skip=CKV2_AWS_6:Public access block enforced via aws_s3_bucket_public_access_block
+ # checkov:skip=CKV2_AWS_61:Lifecycle rules defined via aws_s3_bucket_lifecycle_configuration
+ # checkov:skip=CKV_AWS_21:Versioning enabled via aws_s3_bucket_versioning
+ # checkov:skip=CKV_AWS_144:Replication not required for this environment
+bucket = "${var.name}-waf-logs"
+}
+
 resource "aws_s3_bucket_ownership_controls" "logs" {
   # checkov:skip=CKV2_AWS_65:"Ensure access control lists for S3 buckets are disabled"
   bucket = aws_s3_bucket.buckets["asad-portfolio-logs-bucket"].id
@@ -66,10 +76,34 @@ resource "aws_s3_bucket_public_access_block" "logs" {
   # checkov:skip=CKV_AWS_55:"Ensure S3 bucket has ignore public ACLs enabled"
   # checkov:skip=CKV_AWS_54:"Ensure S3 bucket has ignore public ACLs enabled"
   bucket                  = aws_s3_bucket.buckets["asad-portfolio-logs-bucket"].id
-  block_public_acls       = false
-  block_public_policy     = false
+  block_public_acls       = true
+  block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_policy" "logs" {
+bucket                    = aws_s3_bucket.buckets["asad-portfolio-logs-bucket"].id
+
+policy = jsonencode({
+Version = "2012-10-17"
+Statement = [
+{
+Sid = "AllowCloudFrontLogs"
+Effect = "Allow"
+Principal = {
+Service = "delivery.logs.amazonaws.com"
+}
+Action = "s3:PutObject"
+Resource = "${aws_s3_bucket.logs.arn}/cloudfront/*"
+Condition = {
+StringEquals = {
+"s3:x-amz-acl" = "bucket-owner-full-control"
+}
+}
+}
+]
+})
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "buckets" {

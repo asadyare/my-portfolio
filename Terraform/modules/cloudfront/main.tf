@@ -183,14 +183,81 @@ resource "aws_wafv2_web_acl" "this" {
   }
 }
 
+resource "aws_iam_role" "waf_firehose" {
+name = "${var.name}-waf-firehose-role"
+
+assume_role_policy = jsonencode({
+Version = "2012-10-17"
+Statement = [
+{
+Effect = "Allow"
+Principal = {
+Service = "firehose.amazonaws.com"
+}
+Action = "sts:AssumeRole"
+          
+
+}
+]
+})
+}
+
+resource "aws_iam_role_policy" "waf_firehose" {
+role = aws_iam_role.waf_firehose.id
+
+policy = jsonencode({
+Version = "2012-10-17"
+Statement = [
+{
+Effect = "Allow"
+Action = [
+"logs:CreateLogGroup",
+"logs:CreateLogStream",
+"logs:PutLogEvents",
+"s3:PutObject",
+"s3:PutObjectAcl",
+"s3:ListBucket"
+]
+Resource = [
+  aws_s3_bucket.waf_logs.arn,
+  "${aws_s3_bucket.waf_logs.arn}/*"]
+}
+]
+})
+}
+
+resource "aws_kinesis_firehose_delivery_stream" "waf" {
+provider = aws.use1
+name = "${var.name}-waf-logs"
+destination = "extended_s3"
+
+extended_s3_configuration {
+role_arn = aws_iam_role.waf_firehose.arn
+bucket_arn = aws_s3_bucket.waf_logs.arn
+
+prefix = "waf/"
+error_output_prefix = "waf-errors/"
+
+cloudwatch_logging_options {
+  enabled         = true
+  log_group_name  = aws_cloudwatch_log_group.waf.name
+  log_stream_name = "firehose"
+}
+
+
+}
+}
+
 
 resource "aws_wafv2_web_acl_logging_configuration" "this" {
   provider = aws.use1
   resource_arn            = aws_wafv2_web_acl.this.arn
-  log_destination_configs = [aws_cloudwatch_log_group.waf.arn]
-  depends_on = [
-aws_cloudwatch_log_group.waf,
-aws_cloudwatch_log_resource_policy.waf
+log_destination_configs = [
+aws_kinesis_firehose_delivery_stream.waf.arn
+]
+
+depends_on = [
+aws_kinesis_firehose_delivery_stream.waf
 ]
 }
 
@@ -261,9 +328,10 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   logging_config {
-    bucket = var.logs_bucket_domain
-    prefix = "cloudfront/"
-  }
+bucket = "${aws_s3_bucket.logs.bucket}.s3.amazonaws.com"
+include_cookies = false
+prefix = "cloudfront/"
+}
 
   tags = var.tags
 }
